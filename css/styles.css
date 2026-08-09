@@ -366,3 +366,27 @@ h2.section-title { font-size: 40px; line-height: 1.12; color: var(--cream); }
 }
 
 .text-center { text-align: center; }
+
+/* ---------- What's Coming Up (band page + homepage) ---------- */
+.week-rundown { display: grid; gap: 10px; max-width: 640px; margin: 0 auto; }
+.week-row { background: var(--surface); border: 1px solid var(--hairline); padding: 16px 20px; display: grid; grid-template-columns: 60px 1fr; gap: 18px; align-items: center; text-align: left; border-radius: 6px; }
+@media (max-width: 560px) { .week-row { grid-template-columns: 52px 1fr; gap: 14px; padding: 14px 16px; } }
+.cal-tile { width: 60px; border-radius: 7px; overflow: hidden; text-align: center; background: var(--ink); border: 1px solid var(--hairline-gold); flex-shrink: 0; }
+@media (max-width: 560px) { .cal-tile { width: 52px; } }
+.cal-tile .cal-month { background: var(--gold); color: var(--ink); font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 0; }
+.cal-tile .cal-day { font-size: 22px; font-weight: 800; color: var(--cream); line-height: 1; padding: 6px 0 2px; }
+.cal-tile .cal-weekday { font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; padding-bottom: 6px; }
+.week-title { color: var(--cream); font-weight: 700; font-size: 15px; margin: 0 0 4px; }
+.week-title .week-time { color: var(--gold); font-weight: 600; font-size: 12.5px; margin-left: 8px; }
+.week-detail { color: var(--body-text); font-size: 13.5px; line-height: 1.6; margin: 0; }
+.week-detail a { color: var(--gold); }
+
+/* Condensed variant for homepage use */
+.week-rundown.condensed { gap: 6px; }
+.week-rundown.condensed .week-row { padding: 12px 16px; border: none; background: var(--surface); }
+.week-rundown.condensed .cal-tile { width: 46px; }
+.week-rundown.condensed .cal-tile .cal-day { font-size: 17px; padding: 4px 0 1px; }
+.week-rundown.condensed .cal-tile .cal-month { font-size: 9px; }
+.week-rundown.condensed .cal-tile .cal-weekday { font-size: 8px; padding-bottom: 4px; }
+.week-rundown.condensed .week-title { font-size: 13.5px; }
+.week-rundown.condensed .week-detail { font-size: 12.5px; -webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
