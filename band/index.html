@@ -23,6 +23,17 @@
   .meet-strip { max-width: 640px; margin: 32px auto 0; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
   @media (max-width: 560px) { .meet-strip { grid-template-columns: 1fr; } }
   .meet-cell { background: var(--surface); padding: 22px 26px; }
+  .featured-banner {
+    max-width: 640px; margin: 40px auto; padding: 30px 28px; text-align: center;
+    background: linear-gradient(160deg, var(--surface), var(--surface-hover));
+    border: 1px solid var(--hairline-gold); border-radius: 6px;
+  }
+  .featured-banner .featured-label {
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--gold); font-weight: 700; margin-bottom: 12px;
+  }
+  .featured-banner h2 { font-size: 23px; color: var(--gold-bright); margin: 0 0 10px; line-height: 1.3; }
+  .featured-banner p { color: var(--body-text); font-size: 15px; line-height: 1.65; margin: 0 0 22px; }
 </style>
 </head>
 <body>
@@ -48,10 +59,17 @@
       <span class="eyebrow-text">The Band</span>
     </div>
     <h1 class="page-h1">Tap in 🎸</h1>
-    <p style="font-size:18px;line-height:1.7;color:var(--body-text);margin:20px auto 0;max-width:560px;">You found this because you tapped the tag. Everything you need — meeting times, sign-ups, and what's coming up — is right here.</p>
+    <p style="font-size:18px;line-height:1.7;color:var(--body-text);margin:20px auto 0;max-width:560px;">You found this because you tapped the tag. Everything about TBT — meeting times, sign-ups, events — lives right here, one tap away. Just met someone who wants to know more, join a Bible study, or find their people on campus? Hand them your wrist and let them tap in too.</p>
   </section>
 
   <section class="section" style="padding-top:32px;">
+    <div class="featured-banner">
+      <div class="featured-label">This week's featured resource</div>
+      <h2 id="twl-heading">Loading…</h2>
+      <p id="twl-body"></p>
+      <a class="btn btn-gold btn-md" href="https://twowaystolive.com/" target="_blank" rel="noopener">Read Two Ways to Live →</a>
+    </div>
+
     <div class="meet-strip">
       <div class="meet-cell">
         <div class="fact-label">Sundays, 10:55am</div>
@@ -99,5 +117,19 @@
 </footer>
 
 <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+<script>
+  var twlMessages = [
+    { h: "Got 5 minutes? So does the Gospel.", p: "Two Ways to Live walks through the whole story — creation, sin, judgment, and Jesus — in one simple picture. Grab a copy and keep it in your pocket." },
+    { h: "The easiest way to explain what you believe.", p: "You don't need to be a theologian. Two Ways to Live gives you the words — just take one, read it, and hand it to a friend." },
+    { h: "Two roads. One choice.", p: "It's the whole Gospel, simple enough to walk through over coffee. This week, grab a copy and try it with someone." },
+    { h: "Don't overthink it.", p: "Two Ways to Live gives you a place to start when you don't know how to bring up Jesus. Six boxes are ready and waiting — go grab one." },
+    { h: "Pocket-sized. Life-sized.", p: "Take one, read it for yourself, then give it away. It might be the most important thing you hand someone all week." },
+    { h: "Someone's asking questions. This is your answer.", p: "Two Ways to Live lays out the Gospel clearly and simply — perfect for the friend who's curious but doesn't know where to start." }
+  ];
+  var twlWeek = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
+  var twlPick = twlMessages[twlWeek % twlMessages.length];
+  document.getElementById("twl-heading").textContent = twlPick.h;
+  document.getElementById("twl-body").textContent = twlPick.p;
+</script>
 </body>
 </html>
