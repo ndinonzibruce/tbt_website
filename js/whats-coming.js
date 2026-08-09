@@ -1,23 +1,37 @@
 // "What's Coming Up" — shared data + engine, used by /band and the homepage.
 // Computed fresh from today's date on every page load, so it rolls forward
-// automatically with no manual editing required. Add new one-time events to
-// ONE_TIME_EVENTS as they're scheduled; recurring weekly items go in RECURRING_EVENTS.
+// automatically with no manual editing required.
 
 var WEEKDAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 var MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-var ONE_TIME_EVENTS = [
+// === CHURCH CENTER EVENTS ===================================================
+// Real, dated, registration-style events sourced from the ministry's Church
+// Center page (https://old-north.cls.co/site/tbt). This array is kept in sync
+// automatically by the weekly "TBT weekly events sync" cloud routine, the same
+// one that maintains events.html — add/edit/remove entries here to mirror
+// whatever's true on Church Center. Safe for automation to touch.
+var CHURCH_CENTER_EVENTS = [
+  { date: "2026-08-21", title: "Jake and Sam's Farewell Party", time: "5–9pm", desc: "Food truck, swimming, pickleball, and a prayer send-off at 7:30pm. Sevakeen Country Club, Salem, OH.", link: { text: "Register →", href: "https://old-north-church-17379.churchcenter.com/registrations/events/3807183" } },
+  { date: "2026-08-23", title: "Campus Kickoff", time: "11:30am–2pm", desc: "Welcome back to campus! Come find out what TBT is all about as we kick off the new school year. No TBT Sunday School this week." },
+  { date: "2026-09-04", title: "Fall Bible Conference 2026", time: "Through Sep 6", desc: "“Family Matters — But Not the Way You Think.” Talks, singing, and workshop groups in the book of Ruth at Camp Burton, Burton, OH.", link: { text: "Register →", href: "https://old-north-church-17379.churchcenter.com/registrations/events/3576984" } }
+];
+
+// === HAND-MAINTAINED SEMESTER SCHEDULE ======================================
+// Sunday School series + the Monday Street Talk / Prayer for Campus / Bible
+// Talk & Prayer (James series) rhythm, plus campus-wide dates (IGNITE, first
+// day of classes). This comes from Bruce's own semester planning, NOT Church
+// Center — the weekly sync routine must never add, remove, or edit entries in
+// this array. Update it by hand (or ask Claude) when the semester plan changes.
+var SEMESTER_SCHEDULE_EVENTS = [
   { date: "2026-08-09", title: "TBT Sunday School — Better Together, Talk 4", time: "11am", desc: "Forging Biblical Friendships, Part 2. Service at Old North Church is at 9:15am." },
   { date: "2026-08-16", title: "TBT Sunday School — Better Together, Talk 5", time: "11am", desc: "Panel Morning: Friendships That Shaped Us. Service at Old North Church is at 9:15am." },
   { date: "2026-08-20", title: "IGNITE at YSU", time: "3:00pm", desc: "YSU's welcome event for new students — tailgate games, food, and live music by the Kilcawley fountain.", link: { text: "Learn more →", href: "https://ysu.edu/first-year-student-services/ignite" } },
-  { date: "2026-08-21", title: "Jake and Sam's Farewell Party", time: "5–9pm", desc: "Food truck, swimming, pickleball, and a prayer send-off at 7:30pm. Sevakeen Country Club, Salem, OH.", link: { text: "Register →", href: "https://old-north-church-17379.churchcenter.com/registrations/events/3807183" } },
-  { date: "2026-08-23", title: "Campus Kickoff", time: "11:30am–2pm", desc: "Welcome back to campus! Come find out what TBT is all about as we kick off the new school year. No TBT Sunday School this week." },
   { date: "2026-08-24", title: "Welcome to TBT!", time: "3:55pm", desc: "Open week on campus — no structured teaching yet, just come say hi before the James series kicks off next Monday." },
   { date: "2026-08-24", title: "First Day of Classes", time: "All day", desc: "Fall semester officially begins at YSU." },
   { date: "2026-08-30", title: "TBT Sunday School — Better Together, Talk 6", time: "11am", desc: "Friends on a Mission — rescheduled from Aug 23 because of Campus Kickoff. Service at Old North Church is at 9:15am." },
   { date: "2026-08-31", title: "Street Talk / Tabling", time: "Noon", desc: "Out on YSU campus." },
   { date: "2026-08-31", title: "Bible Talk & Prayer — Wk 1: Brother / Servant", time: "3:55pm", desc: "James 1:1. Williamson Building, Room 1112." },
-  { date: "2026-09-04", title: "Fall Bible Conference 2026", time: "Through Sep 6", desc: "“Family Matters — But Not the Way You Think.” Talks, singing, and workshop groups in the book of Ruth at Camp Burton, Burton, OH.", link: { text: "Register →", href: "https://old-north-church-17379.churchcenter.com/registrations/events/3576984" } },
   { date: "2026-09-07", title: "Labor Day — No Campus", time: "", desc: "No Street Talk, Prayer, or Bible Talk this week." },
   { date: "2026-09-14", title: "Prayer for Campus", time: "Noon", desc: "Out on YSU campus." },
   { date: "2026-09-14", title: "Bible Talk & Prayer — Wk 2: Trials / Temptations", time: "3:55pm", desc: "James 1:2–18. Williamson Building, Room 1112." },
@@ -44,8 +58,11 @@ var ONE_TIME_EVENTS = [
   { date: "2026-11-30", title: "Grill the Pastor", time: "3:55pm", desc: "Out on YSU campus." }
 ];
 
+var ONE_TIME_EVENTS = CHURCH_CENTER_EVENTS.concat(SEMESTER_SCHEDULE_EVENTS);
+
 // Recurring weekly events — occurrences are generated automatically within the horizon window,
 // except on dates already covered above by a specific dated entry (see skipDates).
+// Hand-maintained, same as SEMESTER_SCHEDULE_EVENTS — the sync routine must not touch this.
 var RECURRING_EVENTS = [
   { dow: 0, title: "Sunday Service + TBT Sunday School", time: "9:15 & 11am", desc: "Join the service at Old North Church at 9:15am, then stick around for TBT Sunday School at 11am.", startDate: "2026-08-09", skipDates: ["2026-08-09", "2026-08-16", "2026-08-23", "2026-08-30"] }
 ];
