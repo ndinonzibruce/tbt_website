@@ -273,9 +273,10 @@ h2.section-title { font-size: 40px; line-height: 1.12; color: var(--cream); }
 .events-list { display: grid; gap: 2px; }
 .event-row {
   background: var(--surface); padding: 40px; display: grid;
-  grid-template-columns: 200px minmax(0,1fr) auto; gap: 28px 40px; align-items: center;
+  grid-template-columns: 140px 160px minmax(0,1fr) auto; gap: 28px 32px; align-items: center;
 }
-@media (max-width: 1040px) { .event-row { grid-template-columns: 1fr; align-items: start; } }
+@media (max-width: 1040px) { .event-row { grid-template-columns: 1fr; align-items: start; } .event-photo { width: 100%; height: 200px; } }
+.event-photo { width: 140px; height: 140px; object-fit: cover; display: block; }
 .event-date { font-size: 38px; color: var(--gold-bright); line-height: 1; }
 .event-price { font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); margin-top: 8px; }
 .event-row p { margin: 0; font-size: 17px; line-height: 1.7; color: var(--body-text); }
@@ -340,5 +341,30 @@ h2.section-title { font-size: 40px; line-height: 1.12; color: var(--cream); }
 /* ---------- Watch link (YouTube) ---------- */
 .watch-link { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--gold-bright); margin-top: 14px; }
 .watch-link:hover { color: var(--gold-hover-text); }
+
+/* ---------- Beliefs ---------- */
+.belief-rows { display: grid; gap: 2px; }
+.belief-row {
+  background: var(--surface); padding: 32px 36px; display: grid;
+  grid-template-columns: 1fr auto; gap: 20px; align-items: start;
+}
+@media (max-width: 720px) { .belief-row { grid-template-columns: 1fr; } .belief-num { display: none; } }
+.belief-row h3 { color: var(--gold); font-weight: 700; letter-spacing: 0.02em; font-size: 19px; margin-bottom: 12px; }
+.belief-row p { margin: 0; font-size: 16px; line-height: 1.7; color: var(--cream); }
+.belief-refs { display: block; margin-top: 14px; font-size: 13px; letter-spacing: 0.04em; color: var(--gold-bright); }
+.belief-num { font-family: var(--font); font-size: 40px; color: var(--numeral-ghost); line-height: 1; }
+.belief-source { font-size: 15px; color: var(--dim); max-width: 720px; margin: 0 0 32px; }
+.belief-source a { color: var(--gold-bright); }
+
+/* ---------- Vintage photo treatment ---------- */
+.hero-media img,
+.photo-strip-item img,
+.about-media img,
+.team-photo img,
+.product-photo img,
+.event-photo,
+.band-photo-strip img {
+  filter: sepia(0.28) saturate(0.7) contrast(1.08) brightness(0.9) hue-rotate(-6deg);
+}
 
 .text-center { text-align: center; }
