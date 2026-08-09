@@ -343,16 +343,13 @@ h2.section-title { font-size: 40px; line-height: 1.12; color: var(--cream); }
 .watch-link:hover { color: var(--gold-hover-text); }
 
 /* ---------- Beliefs ---------- */
-.belief-rows { display: grid; gap: 2px; }
-.belief-row {
-  background: var(--surface); padding: 32px 36px; display: grid;
-  grid-template-columns: 1fr auto; gap: 20px; align-items: start;
-}
-@media (max-width: 720px) { .belief-row { grid-template-columns: 1fr; } .belief-num { display: none; } }
-.belief-row h3 { color: var(--gold); font-weight: 700; letter-spacing: 0.02em; font-size: 19px; margin-bottom: 12px; }
-.belief-row p { margin: 0; font-size: 16px; line-height: 1.7; color: var(--cream); }
+.belief-rows { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 2px; }
+@media (max-width: 900px) { .belief-rows { grid-template-columns: 1fr; } }
+.belief-row { background: var(--surface); padding: 32px; display: flex; flex-direction: column; gap: 14px; }
+.belief-num { font-family: var(--font); font-size: 30px; color: var(--gold); line-height: 1; }
+.belief-row h3 { color: var(--gold); font-weight: 700; letter-spacing: 0.02em; font-size: 19px; margin: 0; }
+.belief-row p { margin: 0; font-size: 16px; line-height: 1.7; color: var(--cream); flex: 1; }
 .belief-refs { display: block; margin-top: 14px; font-size: 13px; letter-spacing: 0.04em; color: var(--gold-bright); }
-.belief-num { font-family: var(--font); font-size: 40px; color: var(--numeral-ghost); line-height: 1; }
 .belief-source { font-size: 15px; color: var(--dim); max-width: 720px; margin: 0 0 32px; }
 .belief-source a { color: var(--gold-bright); }
 
