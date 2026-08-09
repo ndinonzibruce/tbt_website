@@ -32,8 +32,12 @@
     font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
     color: var(--gold); font-weight: 700; margin-bottom: 12px;
   }
-  .featured-banner h2 { font-size: 23px; color: var(--gold-bright); margin: 0 0 10px; line-height: 1.3; }
-  .featured-banner p { color: var(--body-text); font-size: 15px; line-height: 1.65; margin: 0 0 22px; }
+  .featured-banner h2 { font-size: 23px; color: var(--gold-bright); margin: 0 0 16px; line-height: 1.3; }
+  .twl-verse { margin: 0 0 6px; font-style: italic; color: var(--cream); font-size: 15px; line-height: 1.6; }
+  .twl-ref { display: block; color: var(--gold); font-size: 12px; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 20px; }
+  .twl-summary { list-style: none; margin: 0 0 24px; padding: 0; display: grid; gap: 9px; text-align: left; max-width: 460px; margin-left: auto; margin-right: auto; }
+  .twl-summary li { color: var(--body-text); font-size: 14px; line-height: 1.55; padding-left: 18px; position: relative; }
+  .twl-summary li::before { content: "—"; position: absolute; left: 0; color: var(--gold); }
 </style>
 </head>
 <body>
@@ -64,10 +68,12 @@
 
   <section class="section" style="padding-top:32px;">
     <div class="featured-banner">
-      <div class="featured-label">This week's featured resource</div>
+      <div class="featured-label" id="twl-eyebrow">Two Ways to Live</div>
       <h2 id="twl-heading">Loading…</h2>
-      <p id="twl-body"></p>
-      <a class="btn btn-gold btn-md" href="https://twowaystolive.com/" target="_blank" rel="noopener">Read Two Ways to Live →</a>
+      <p class="twl-verse" id="twl-verse"></p>
+      <cite class="twl-ref" id="twl-ref"></cite>
+      <ul class="twl-summary" id="twl-summary"></ul>
+      <a class="btn btn-gold btn-md" href="https://twowaystolive.com/" target="_blank" rel="noopener">Read the whole thing →</a>
     </div>
 
     <div class="meet-strip">
@@ -118,18 +124,77 @@
 
 <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
 <script>
-  var twlMessages = [
-    { h: "Got 5 minutes? So does the Gospel.", p: "Two Ways to Live walks through the whole story — creation, sin, judgment, and Jesus — in one simple picture. Grab a copy and keep it in your pocket." },
-    { h: "The easiest way to explain what you believe.", p: "You don't need to be a theologian. Two Ways to Live gives you the words — just take one, read it, and hand it to a friend." },
-    { h: "Two roads. One choice.", p: "It's the whole Gospel, simple enough to walk through over coffee. This week, grab a copy and try it with someone." },
-    { h: "Don't overthink it.", p: "Two Ways to Live gives you a place to start when you don't know how to bring up Jesus. Six boxes are ready and waiting — go grab one." },
-    { h: "Pocket-sized. Life-sized.", p: "Take one, read it for yourself, then give it away. It might be the most important thing you hand someone all week." },
-    { h: "Someone's asking questions. This is your answer.", p: "Two Ways to Live lays out the Gospel clearly and simply — perfect for the friend who's curious but doesn't know where to start." }
+  var twlPoints = [
+    {
+      h: "God, the good ruler and creator",
+      verse: "You are worthy, our Lord and God, to receive glory and honor and power, for you created all things, and by your will they were created and have their being.",
+      ref: "Revelation 4:11",
+      points: [
+        "God is the ruler of the world.",
+        "He made the world.",
+        "He made us to rule his good world, giving thanks and honor to him."
+      ]
+    },
+    {
+      h: "Our rebellion against God",
+      verse: "We all, like sheep, have gone astray, each of us has turned to our own way…",
+      ref: "Isaiah 53:6a",
+      points: [
+        "We all reject God as our ruler by running our own lives our own way.",
+        "By rebelling against God's way, we damage ourselves, each other, and the world."
+      ]
+    },
+    {
+      h: "God's justice",
+      verse: "Just as people are destined to die once, and after that to face judgment…",
+      ref: "Hebrews 9:27",
+      points: [
+        "God won't let us rebel against him forever.",
+        "God's punishment for rebellion is death and judgment."
+      ]
+    },
+    {
+      h: "God sent Jesus to die for us",
+      verse: "We all, like sheep, have gone astray, each of us has turned to our own way; and the LORD has laid on him the iniquity of us all.",
+      ref: "Isaiah 53:6",
+      points: [
+        "Because of his love, God sent his Son into the world: the man Jesus Christ.",
+        "Jesus always lived under God's rule.",
+        "But Jesus took our punishment by dying in our place."
+      ]
+    },
+    {
+      h: "Jesus, the risen ruler and savior",
+      verse: "Praise be to the God and Father of our Lord Jesus Christ! In his great mercy he has given us new birth into a living hope through the resurrection of Jesus Christ from the dead…",
+      ref: "1 Peter 1:3",
+      points: [
+        "God raised Jesus to life again as the ruler and judge of the world.",
+        "Jesus has conquered death, now brings forgiveness and new life, and will return in glory."
+      ]
+    },
+    {
+      h: "Two ways to live",
+      verse: "Whoever believes in the Son has eternal life, but whoever rejects the Son will not see life, for God's wrath remains on them.",
+      ref: "John 3:36",
+      points: [
+        "Our way — reject God as ruler, live our own way, damaged by our rebellion, facing death and judgment.",
+        "God's new way — submit to Jesus as our ruler, rely on his death and resurrection, forgiven, and receive a new life that lasts forever."
+      ]
+    }
   ];
   var twlWeek = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
-  var twlPick = twlMessages[twlWeek % twlMessages.length];
+  var twlIdx = twlWeek % twlPoints.length;
+  var twlPick = twlPoints[twlIdx];
+  document.getElementById("twl-eyebrow").textContent = "Two Ways to Live · Point " + (twlIdx + 1) + " of 6";
   document.getElementById("twl-heading").textContent = twlPick.h;
-  document.getElementById("twl-body").textContent = twlPick.p;
+  document.getElementById("twl-verse").textContent = "“" + twlPick.verse + "”";
+  document.getElementById("twl-ref").textContent = twlPick.ref;
+  var twlList = document.getElementById("twl-summary");
+  twlPick.points.forEach(function (pt) {
+    var li = document.createElement("li");
+    li.textContent = pt;
+    twlList.appendChild(li);
+  });
 </script>
 </body>
 </html>
