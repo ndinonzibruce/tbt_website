@@ -43,8 +43,8 @@
       <span class="eyebrow-rule"></span>
       <span class="eyebrow-text">404</span>
     </div>
-    <h1 class="page-h1">Looks like this page wandered off.</h1>
-    <p style="font-size:18px;line-height:1.7;color:var(--body-text);margin:20px auto 0;max-width:520px;">Whatever you were looking for isn't here — maybe the link's outdated, or maybe you fat-fingered it. Either way, here's a few places to pick back up.</p>
+    <h1 class="page-h1" id="err-h1">Looks like this page wandered off.</h1>
+    <p style="font-size:18px;line-height:1.7;color:var(--body-text);margin:20px auto 0;max-width:520px;" id="err-sub">Whatever you were looking for isn't here — maybe the link's outdated, or maybe you fat-fingered it. Either way, here's a few places to pick back up.</p>
     <div class="btn-row" style="display:flex;gap:14px;justify-content:center;margin-top:32px;flex-wrap:wrap;">
       <a class="btn btn-gold btn-lg" href="index.html">Back to Home</a>
       <a class="btn btn-ghost btn-lg" href="events.html">See Events</a>
@@ -96,6 +96,22 @@
 
 <script src="js/main.js"></script>
 <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+<script>
+  var err404Jokes = [
+    { h: "Looks like this link got lost in translation.", p: "Ever since Babel, communication's been a little broken. This page didn't survive the confusion." },
+    { h: "We left the 99 to come find this page.", p: "Even the Good Shepherd couldn't track this one down. Try one of the links below instead." },
+    { h: "You've been wandering for 40 years and still haven't found it.", p: "Unlike the Israelites, we promise this won't take another four decades. Head back home." },
+    { h: "This page is somewhere in the belly of a big fish.", p: "We sent someone to go get it. Still waiting. In the meantime, here's the way out." },
+    { h: "The dove came back empty-handed on this one.", p: "No olive branch, no page. Let's get you back to dry ground." },
+    { h: "Even God asked, “Where are you?” — and He's omniscient.", p: "This page is hiding better than Adam did. Let's find you something that actually exists." },
+    { h: "He is not here — and neither is this page.", p: "Unlike that morning, this really isn't good news. But there's plenty else worth finding below." },
+    { h: "This page didn't show up like manna this morning.", p: "No bread from heaven here — just a broken link. Try again below." },
+    { h: "Like Peter, this link started strong, then sank.", p: "Let's get you back in the boat." }
+  ];
+  var err404Pick = err404Jokes[Math.floor(Math.random() * err404Jokes.length)];
+  document.getElementById("err-h1").textContent = err404Pick.h;
+  document.getElementById("err-sub").textContent = err404Pick.p;
+</script>
 <script data-goatcounter="https://thebibletalksysu.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
 </body>
