@@ -247,6 +247,28 @@ h2.section-title { font-size: 40px; line-height: 1.12; color: var(--cream); }
 .team-role { font-size: 15px; line-height: 1.6; color: var(--gold); font-weight: 500; margin-top: 10px; }
 .team-bio { font-size: 14px; line-height: 1.65; color: var(--muted); margin-top: 14px; }
 
+/* ---------- Reason cards (New Here page) ---------- */
+.grid { display: grid; gap: 2px; }
+.grid-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+@media (max-width: 720px) { .grid-2 { grid-template-columns: 1fr; } }
+.card { background: var(--surface); padding: 34px 32px; }
+.card-icon { color: var(--gold); margin-bottom: 18px; }
+.card-icon svg { width: 30px; height: 30px; display: block; }
+.card h3 { font-size: 18px; color: var(--cream); margin: 0 0 8px; font-weight: 600; }
+.card p { font-size: 14.5px; line-height: 1.65; color: var(--muted); margin: 0; }
+.team-bio-full[hidden] { display: none; }
+.team-bio-toggle {
+  display: inline-flex; align-items: center; margin-top: 16px; border: none;
+  padding: 9px 18px; border-radius: 999px;
+  font-family: var(--font); font-size: 12.5px; font-weight: 800; letter-spacing: 0.02em;
+  color: var(--ink); cursor: pointer; transition: transform 0.15s ease, filter 0.15s ease;
+}
+.team-bio-toggle:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.team-bio-toggle.c-1 { background: #B5654A; }
+.team-bio-toggle.c-2 { background: #4F8F82; }
+.team-bio-toggle.c-3 { background: #7A6BA8; }
+.team-bio-toggle.c-4 { background: #A8607D; }
+
 /* ---------- Get Involved ---------- */
 .page-h1 { font-size: 52px; line-height: 1.1; color: var(--cream); }
 @media (max-width: 1040px) { .page-h1 { font-size: 42px; } }
@@ -274,8 +296,9 @@ h2.section-title { font-size: 40px; line-height: 1.12; color: var(--cream); }
 .events-list { display: grid; gap: 2px; }
 .event-row {
   background: var(--surface); padding: 40px; display: grid;
-  grid-template-columns: 140px 160px minmax(0,1fr) auto; gap: 28px 32px; align-items: center;
+  grid-template-columns: 140px 160px minmax(0,1fr) 230px; gap: 28px 32px; align-items: center;
 }
+.event-row .btn, .event-row .btn-inactive { justify-self: start; }
 @media (max-width: 1040px) { .event-row { grid-template-columns: 1fr; align-items: start; } .event-photo { width: 100%; height: 200px; } }
 .event-photo { width: 140px; height: 140px; object-fit: cover; display: block; }
 .event-date { font-size: 38px; color: var(--gold-bright); line-height: 1; }

@@ -16,6 +16,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  document.querySelectorAll(".team-bio-toggle").forEach((btn) => {
+    const bio = btn.nextElementSibling;
+    if (!bio || !bio.classList.contains("team-bio-full")) return;
+    const openLabel = btn.textContent;
+    btn.addEventListener("click", () => {
+      const open = bio.hidden;
+      bio.hidden = !open;
+      btn.setAttribute("aria-expanded", String(open));
+      btn.textContent = open ? "Hide ↑" : openLabel;
+    });
+  });
+
   const backToTop = document.createElement("button");
   backToTop.className = "back-to-top";
   backToTop.setAttribute("aria-label", "Back to top");
