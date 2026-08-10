@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /band/
+
+Sitemap: https://tbtysu.org/sitemap.xml

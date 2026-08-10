@@ -393,3 +393,16 @@ p.form-note { font-size: 10.5px; color: var(--dim); line-height: 1.5; margin: 10
 .week-rundown.condensed .cal-tile .cal-weekday { font-size: 8px; padding-bottom: 4px; }
 .week-rundown.condensed .week-title { font-size: 13.5px; }
 .week-rundown.condensed .week-detail { font-size: 12.5px; -webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ---------- Back to top ---------- */
+.back-to-top {
+  position: fixed; bottom: 24px; right: 24px; width: 44px; height: 44px;
+  border-radius: 50%; background: var(--gold); color: var(--ink); border: none;
+  font-size: 18px; font-weight: 800; cursor: pointer; z-index: 40;
+  opacity: 0; pointer-events: none; transform: translateY(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+}
+.back-to-top.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.back-to-top:hover { background: var(--gold-bright); }
+@media (max-width: 560px) { .back-to-top { bottom: 16px; right: 16px; width: 40px; height: 40px; font-size: 16px; } }

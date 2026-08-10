@@ -15,4 +15,18 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+
+  const backToTop = document.createElement("button");
+  backToTop.className = "back-to-top";
+  backToTop.setAttribute("aria-label", "Back to top");
+  backToTop.textContent = "↑";
+  document.body.appendChild(backToTop);
+
+  backToTop.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  window.addEventListener("scroll", () => {
+    backToTop.classList.toggle("visible", window.scrollY > 600);
+  });
 });
