@@ -72,8 +72,11 @@ h1, h2, h3, h4 { font-family: var(--font); font-weight: 500; margin: 0; color: v
   font-family: var(--font);
   font-size: 14px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
   border-radius: 2px; white-space: nowrap; cursor: pointer; border: none;
-  transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+  min-height: 44px;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .15s ease, box-shadow .15s ease;
 }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.35); }
+.btn:active { transform: translateY(0); box-shadow: none; }
 .btn-lg { padding: 15px 28px; }
 .btn-md { padding: 13px 24px; }
 .btn-sm { padding: 11px 20px; }
@@ -91,6 +94,18 @@ h1, h2, h3, h4 { font-family: var(--font); font-weight: 500; margin: 0; color: v
   color: var(--cream);
 }
 .link-underline:hover { color: var(--gold-bright); }
+
+/* ---------- Accessibility: focus states ---------- */
+a:focus-visible, button:focus-visible, .btn:focus-visible,
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2px solid var(--gold); outline-offset: 2px;
+}
+input, textarea, select {
+  font-size: 16px; /* prevents iOS auto-zoom on focus */
+}
+@media (max-width: 720px) {
+  .section { padding-left: 20px; padding-right: 20px; }
+}
 
 /* ---------- Header ---------- */
 .site-header {
