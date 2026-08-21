@@ -436,3 +436,44 @@ p.form-note { font-size: 10.5px; color: var(--dim); line-height: 1.5; margin: 10
 .back-to-top.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
 .back-to-top:hover { background: var(--gold-bright); }
 @media (max-width: 560px) { .back-to-top { bottom: 16px; right: 16px; width: 40px; height: 40px; font-size: 16px; } }
+
+/* ---------- FBC popup (uses FBC26's own brand colors, not TBT's) ---------- */
+.fbc-popup-overlay {
+  position: fixed; inset: 0; z-index: 200; background: rgba(10,15,12,0.82);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  opacity: 0; transition: opacity 0.2s ease;
+}
+.fbc-popup-overlay.visible { opacity: 1; }
+.fbc-popup-card {
+  position: relative; background: #223028; border: 1px solid rgba(108,146,134,0.35);
+  max-width: 440px; width: 100%; padding: 0 0 32px; text-align: center;
+  transform: translateY(10px); transition: transform 0.2s ease;
+  overflow: hidden;
+}
+.fbc-popup-overlay.visible .fbc-popup-card { transform: translateY(0); }
+.fbc-popup-banner {
+  background: linear-gradient(160deg, #6C9286 0%, #4E6960 100%);
+  padding: 28px 36px 22px; margin-bottom: 24px;
+}
+.fbc-popup-content { padding: 0 36px; }
+.fbc-popup-close {
+  position: absolute; top: 14px; right: 14px; background: none; border: none;
+  color: rgba(236,235,228,0.75); font-size: 14px; cursor: pointer; padding: 8px; line-height: 1;
+}
+.fbc-popup-close:hover { color: #ECEBE4; }
+.fbc-popup-eyebrow { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(236,235,228,0.75); font-weight: 700; margin-bottom: 10px; }
+.fbc-popup-card h2 { font-size: 24px; color: #ECEBE4; line-height: 1.3; margin: 0; }
+.fbc-popup-detail { font-size: 13px; color: #ECEBE4; font-weight: 600; margin: 10px 0 0; opacity: 0.9; }
+.fbc-popup-body { font-size: 14.5px; line-height: 1.6; color: #C9D2CC; margin: 0 0 14px; }
+.fbc-popup-price { font-size: 15px; color: #ECEBE4; font-weight: 600; margin: 0 0 4px; }
+.fbc-popup-scholarship { font-size: 12.5px; color: #A9B7B0; margin: 0 0 20px; line-height: 1.5; }
+.fbc-popup-scholarship a { color: #8FC4AE; }
+.fbc-popup-register {
+  width: 100%; background: #6C9286; color: #1B2620; border-color: #6C9286;
+}
+.fbc-popup-register:hover { background: #82A599; }
+.fbc-popup-dismiss {
+  display: block; width: 100%; background: none; border: none; margin-top: 14px;
+  color: #8FA098; font-size: 13px; cursor: pointer; text-decoration: underline;
+}
+.fbc-popup-dismiss:hover { color: #C9D2CC; }
