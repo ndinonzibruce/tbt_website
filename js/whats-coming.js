@@ -47,6 +47,7 @@ var SEMESTER_SCHEDULE_EVENTS = [
   { date: "2026-10-19", title: "Bible Talk & Prayer — Wk 7: False Wisdom / True Wisdom", time: "3:55pm", venue: "Williamson Building, Room 2212", desc: "James 3:13–18." },
   { date: "2026-10-26", title: "Prayer for Campus", time: "Noon", venue: "YSU Campus", desc: "Out on YSU campus." },
   { date: "2026-10-26", title: "Bible Talk & Prayer — Wk 8: Worldliness / Godliness", time: "3:55pm", venue: "Williamson Building, Room 2212", desc: "James 4:1–10." },
+  { date: "2026-10-30", title: "Game Night", time: "6–9pm", venue: "Old North Church", desc: "A night of games and hanging out together." },
   { date: "2026-11-02", title: "Street Talk", time: "Noon", venue: "YSU Campus", desc: "Out on YSU campus." },
   { date: "2026-11-02", title: "Bible Talk & Prayer — Wk 9: Arrogance / Humility", time: "3:55pm", venue: "Williamson Building, Room 2212", desc: "James 4:11–17." },
   { date: "2026-11-09", title: "Prayer for Campus", time: "Noon", venue: "YSU Campus", desc: "Out on YSU campus." },
@@ -55,7 +56,8 @@ var SEMESTER_SCHEDULE_EVENTS = [
   { date: "2026-11-16", title: "Bible Talk & Prayer — Wk 11: Suffering / Comfort", time: "3:55pm", venue: "Williamson Building, Room 2212", desc: "James 5:7–12." },
   { date: "2026-11-23", title: "Prayer for Campus", time: "Noon", venue: "YSU Campus", desc: "Out on YSU campus." },
   { date: "2026-11-23", title: "Bible Talk & Prayer — Wk 12: Faithful / Faithless", time: "3:55pm", venue: "Williamson Building, Room 2212", desc: "James 5:13–20." },
-  { date: "2026-11-30", title: "Grill the Pastor", time: "3:55pm", venue: "YSU Campus", desc: "Out on YSU campus." }
+  { date: "2026-11-30", title: "Grill the Pastor", time: "3:55pm", venue: "YSU Campus", desc: "Out on YSU campus." },
+  { date: "2026-12-11", title: "Christmas Party", time: "7–9pm", venue: "Old North Church", desc: "Celebrating the semester together before the break." }
 ];
 
 var ONE_TIME_EVENTS = CHURCH_CENTER_EVENTS.concat(SEMESTER_SCHEDULE_EVENTS);
