@@ -14,7 +14,6 @@ var MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"
 var CHURCH_CENTER_EVENTS = [
   { date: "2026-08-21", title: "Jake and Sam's Farewell Party", time: "5–9pm", venue: "Sevakeen Country Club, Salem, OH", desc: "Food truck, swimming, pickleball, and a prayer send-off at 7:30pm.", link: { text: "Register →", href: "https://old-north-church-17379.churchcenter.com/registrations/events/3807183" } },
   { date: "2026-08-23", title: "Campus Kickoff", time: "11:30am–2pm", venue: "YSU Campus", desc: "Welcome back to campus! Come find out what TBT is all about as we kick off the new school year. No TBT Sunday School this week." },
-  { date: "2026-09-04", title: "Fall Bible Conference 2026", time: "Through Sep 6", venue: "Camp Burton, Burton, OH", desc: "“Family Matters — But Not the Way You Think.” Talks, singing, and workshop groups in the book of Ruth.", link: { text: "Register →", href: "https://old-north-church-17379.churchcenter.com/registrations/events/3576984" } }
 ];
 
 // === HAND-MAINTAINED SEMESTER SCHEDULE ======================================
