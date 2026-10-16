@@ -18,7 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,500;6..12,600;6..12,700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet" />
 <link rel="icon" type="image/png" href="images/favicon.png?v=6" />
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png?v=6" />
-<link rel="stylesheet" href="css/styles.css?v=12" />
+<link rel="stylesheet" href="css/styles.css?v=13" />
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -42,13 +42,22 @@
   ]
 }
 </script>
-<script type="application/ld+json">
-{
+<script>
+(function () {
+  // Weekly Monday 3:55pm meeting: always advertise the next upcoming one.
+  var now = new Date();
+  var d = new Date(now);
+  d.setHours(15, 55, 0, 0);
+  d.setDate(d.getDate() + (8 - d.getDay()) % 7);
+  if (d < now) d.setDate(d.getDate() + 7);
+  var pad = function (n) { return (n < 10 ? "0" : "") + n; };
+  var off = -d.getTimezoneOffset();
+  var tz = (off >= 0 ? "+" : "-") + pad(Math.floor(Math.abs(off) / 60)) + ":" + pad(Math.abs(off) % 60);
+  var data = {
   "@context": "https://schema.org",
   "@type": "Event",
   "name": "Bible Talk + Prayer",
-  "description": "Weekly Bible study and prayer gathering for YSU students, every Monday at 4pm.",
-  "startDate": "2026-08-17T16:00:00-04:00",
+  "description": "Weekly Bible study and prayer gathering for YSU students, every Monday at 3:55pm.",
   "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
   "eventStatus": "https://schema.org/EventScheduled",
   "location": {
@@ -68,7 +77,13 @@
     "name": "The Bible Talks",
     "url": "https://tbtysu.org"
   }
-}
+};
+  data.startDate = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T15:55:00" + tz;
+  var el = document.createElement("script");
+  el.type = "application/ld+json";
+  el.text = JSON.stringify(data);
+  document.head.appendChild(el);
+})();
 </script>
 </head>
 <body>
@@ -106,7 +121,7 @@
           <span class="eyebrow-text">Campus ministry at YSU</span>
         </div>
         <h1>Maturing students in <em>Christ</em> at Youngstown State University and beyond.</h1>
-        <p class="hero-lead">We meet every Monday at 4pm in the Williamson Building to open the Bible together. Come as you are — no background required.</p>
+        <p class="hero-lead">We meet every Monday at 3:55pm in the Williamson Building to open the Bible together. Come as you are — no background required.</p>
         <div class="hero-actions">
           <a class="btn btn-gold btn-lg" href="new-here.html">New here? Start here</a>
           <a class="btn btn-ghost btn-lg" href="get-involved.html">Join a group</a>
@@ -124,7 +139,7 @@
         <div class="fact-cell">
           <div class="fact-label">Every Monday</div>
           <div class="fact-title">Bible Talk + Prayer</div>
-          <div class="fact-detail">Williamson Building, Room 2212 · 4:00pm</div>
+          <div class="fact-detail">Williamson Building, Room 2212 · 3:55pm</div>
         </div>
         <div class="fact-cell">
           <div class="fact-label">Alternate Mondays</div>
@@ -163,14 +178,14 @@
         <div class="way-row">
           <div>
             <div class="way-label">Bible Talk + Prayer</div>
-            <p>Mondays at 4pm we work through a book of the Bible or a topic, then pray for the people around us.</p>
+            <p>Mondays at 3:55pm we work through a book of the Bible or a topic, then pray for the people around us.</p>
           </div>
           <span class="way-num">02</span>
         </div>
         <div class="way-row">
           <div>
             <div class="way-label">Sunday Mornings</div>
-            <p>Join us for the service at Old North Church at 9:15am, then TBT Sunday School right after at 11am.</p>
+            <p>Join us for the service at Old North Church at 9:15am, then TBT Sunday School right after at 10:55am.</p>
           </div>
           <span class="way-num">03</span>
         </div>
@@ -187,11 +202,17 @@
   <section class="section">
     <h2 class="section-title" style="margin-bottom:16px;">What our students say</h2>
     <a class="watch-link" href="https://www.youtube.com/watch?v=pPPhvRGbAMs" target="_blank" rel="noopener" style="margin-top:0;margin-bottom:40px;">▶ Watch: Student Testimonies (0:49)</a>
-    <div class="testimonial-grid">
+    <div class="testimonial-grid" id="testimonials">
       <figure class="testimonial-card">
         <span class="testimonial-mark">&ldquo;</span>
         <blockquote class="testimonial-quote">Moving to college can be scary. It is easy to feel alone and overwhelmed by change. TBT has given me a second family and a support group to help get me through this difficult transition.</blockquote>
-        <figcaption class="testimonial-name">Jessica Deal</figcaption>
+        <details class="testimonial-more">
+          <summary>More from Jessica</summary>
+          <p><span class="testimonial-q">What keeps me coming back</span>The people holding me accountable and the people I see growing.</p>
+          <p><span class="testimonial-q">What I hope people experience</span>Life transformation.</p>
+          <p><span class="testimonial-q">A moment I'll never forget</span>When Bruce recognized me and shouted my name across campus after only meeting me once.</p>
+        </details>
+        <figcaption><span class="testimonial-name">Jessica Deal</span><span class="testimonial-meta">CBS and Media · Joined TBT Fall 2023 · Dental Hygiene</span></figcaption>
       </figure>
       <figure class="testimonial-card">
         <span class="testimonial-mark">&ldquo;</span>
@@ -202,6 +223,46 @@
         <span class="testimonial-mark">&ldquo;</span>
         <blockquote class="testimonial-quote">TBT has helped me to grow and consider others beyond myself. Through the regular community and teaching of God's Word I am reminded of the love that Christ has for me through His people. During a time when determining what's true is oddly confusing, college students have the opportunity to be reminded of the never changing hope and truth that Jesus brings.</blockquote>
         <figcaption class="testimonial-name">Jacob Pitzer</figcaption>
+      </figure>
+      <figure class="testimonial-card">
+        <span class="testimonial-mark">&ldquo;</span>
+        <blockquote class="testimonial-quote">Everything. I love the teaching, preaching, and training. I love my friends. I love all the little moments. There is honestly nothing I do not like about TBT.</blockquote>
+        <details class="testimonial-more">
+          <summary>More from Maddie</summary>
+          <p><span class="testimonial-q">What I hope people experience</span>I hope people experience genuine friendship and a better understanding of the gospel and its urgency.</p>
+          <p><span class="testimonial-q">A moment I'll never forget</span>I'll never forget praising God as a group during WHTQT, what a special moment.</p>
+        </details>
+        <figcaption><span class="testimonial-name">Maddie Mraz</span><span class="testimonial-meta">E-Team · Joined TBT 2025 · Middle Childhood Education</span></figcaption>
+      </figure>
+      <figure class="testimonial-card">
+        <span class="testimonial-mark">&ldquo;</span>
+        <blockquote class="testimonial-quote">The idea that Christ speaks through open Bibles, and how we not only read Scripture but are taught how to read Scripture properly. Beyond that, the Christian community at TBT has become a big part of my life and my walk with Christ — they have become family.</blockquote>
+        <details class="testimonial-more">
+          <summary>More from Shalom</summary>
+          <p><span class="testimonial-q">What I hope people experience</span>A deeper understanding of what the Gospel is and the call upon our lives as believers as we go through God's Word. Not only that, but I also hope people get to experience what it feels like to be part of a young adult community with Christ as the foundation.</p>
+          <p><span class="testimonial-q">A moment I'll never forget</span>I think every moment at TBT is memorable and unique in its own way, so I would say the one thing I'll never forget is the feeling of being there and the excitement I get when I'm on my way to TBT.</p>
+        </details>
+        <figcaption><span class="testimonial-name">Shalom Mapiki</span><span class="testimonial-meta">Joined TBT Fall 2024 · Biology</span></figcaption>
+      </figure>
+            <figure class="testimonial-card">
+        <span class="testimonial-mark">&ldquo;</span>
+        <blockquote class="testimonial-quote">The desire to grow more in the Lord and to serve.</blockquote>
+        <details class="testimonial-more">
+          <summary>More from Asher</summary>
+          <p><span class="testimonial-q">What I hope people experience</span>Learn the truth of the Gospel and are able to understand and share with people in their lives (to become disciple making disciples).</p>
+          <p><span class="testimonial-q">A moment I'll never forget</span>Cross con 25.</p>
+        </details>
+        <figcaption><span class="testimonial-name">Asher Chiwawa</span><span class="testimonial-meta">Quad and greeting new people · Joined TBT 2024 · Mechanical Engineering</span></figcaption>
+      </figure>
+      <figure class="testimonial-card">
+        <span class="testimonial-mark">&ldquo;</span>
+        <blockquote class="testimonial-quote">The faithful preaching of the Word, the Christ centered community, and the investment in youth.</blockquote>
+        <details class="testimonial-more">
+          <summary>More from Josiah</summary>
+          <p><span class="testimonial-q">What I hope people experience</span>I hope people experience a community that will nourish them into a more faithful follower of Christ.</p>
+          <p><span class="testimonial-q">A moment I'll never forget</span>Dapping Jake up at Ignite.</p>
+        </details>
+        <figcaption><span class="testimonial-name">Josiah</span><span class="testimonial-meta">E-Team · Joined TBT 2025 · Civil Engineering</span></figcaption>
       </figure>
     </div>
   </section>
@@ -232,7 +293,7 @@
     </div>
     <div>
       <div class="footer-col-label">Find us</div>
-      <div class="footer-addr">Williamson Building, Room 2212<br />Youngstown State University<br />Mondays at 4:00pm</div><div class="footer-addr" style="margin-top:14px;">Old North Church<br />7105 Herbert Rd<br />Canfield, OH 44406<br />(330) 533-6848</div>
+      <div class="footer-addr">Williamson Building, Room 2212<br />Youngstown State University<br />Mondays at 3:55pm</div><div class="footer-addr" style="margin-top:14px;">Old North Church<br />7105 Herbert Rd<br />Canfield, OH 44406<br />(330) 533-6848</div>
     </div>
     <div>
       <div class="footer-col-label">Quick links</div>
@@ -261,7 +322,8 @@
 
 <script src="js/main.js"></script>
 <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
-<script src="js/whats-coming.js?v=5"></script>
+<script src="js/whats-coming.js?v=6"></script>
+<script src="js/testimonials.js"></script>
 <script>
   renderWhatsComingUp("home-week-rundown", { maxItems: 5, horizonDays: 31 });
 </script>

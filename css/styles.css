@@ -437,3 +437,14 @@ p.form-note { font-size: 10.5px; color: var(--dim); line-height: 1.5; margin: 10
 .back-to-top.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
 .back-to-top:hover { background: var(--gold-bright); }
 @media (max-width: 560px) { .back-to-top { bottom: 16px; right: 16px; width: 40px; height: 40px; font-size: 16px; } }
+
+/* ---------- Testimonial rotation + extras ---------- */
+.testimonial-grid { transition: opacity .45s ease; }
+.testimonial-grid.is-fading { opacity: 0; }
+.testimonial-card.is-hidden { display: none; }
+.testimonial-card figcaption { display: flex; flex-direction: column; gap: 6px; }
+.testimonial-meta { font-size: 13px; line-height: 1.5; color: var(--body-text); opacity: .75; }
+.testimonial-more summary { cursor: pointer; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+.testimonial-more p { margin: 14px 0 0; font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 17px; line-height: 1.55; color: var(--body-text); }
+.testimonial-q { display: block; font-family: 'Nunito Sans', sans-serif; font-style: normal; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; opacity: .7; margin-bottom: 4px; }
+@media (prefers-reduced-motion: reduce) { .testimonial-grid { transition: none; } }

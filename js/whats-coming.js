@@ -23,12 +23,12 @@ var CHURCH_CENTER_EVENTS = [
 // Center — the weekly sync routine must never add, remove, or edit entries in
 // this array. Update it by hand (or ask Claude) when the semester plan changes.
 var SEMESTER_SCHEDULE_EVENTS = [
-  { date: "2026-08-09", title: "TBT Sunday School — Better Together, Talk 4", time: "11am", venue: "Old North Church", desc: "Forging Biblical Friendships, Part 2. Service at Old North Church is at 9:15am." },
-  { date: "2026-08-16", title: "TBT Sunday School — Better Together, Talk 5", time: "11am", venue: "Old North Church", desc: "Panel Morning: Friendships That Shaped Us. Service at Old North Church is at 9:15am." },
+  { date: "2026-08-09", title: "TBT Sunday School — Better Together, Talk 4", time: "10:55am", venue: "Old North Church", desc: "Forging Biblical Friendships, Part 2. Service at Old North Church is at 9:15am." },
+  { date: "2026-08-16", title: "TBT Sunday School — Better Together, Talk 5", time: "10:55am", venue: "Old North Church", desc: "Panel Morning: Friendships That Shaped Us. Service at Old North Church is at 9:15am." },
   { date: "2026-08-20", title: "IGNITE at YSU", time: "3:00pm", venue: "Kilcawley Fountain, YSU", desc: "YSU's welcome event for new students — tailgate games, food, and live music.", link: { text: "Learn more →", href: "https://ysu.edu/first-year-student-services/ignite" } },
-  { date: "2026-08-24", title: "Bible Talk & Prayer", time: "4:00pm", venue: "Williamson Building, Room 2212", desc: "Come say hi and dig into the Word with us — our James series begins the following Monday." },
+  { date: "2026-08-24", title: "Bible Talk & Prayer", time: "3:55pm", venue: "Williamson Building, Room 2212", desc: "Come say hi and dig into the Word with us — our James series begins the following Monday." },
   { date: "2026-08-24", title: "First Day of Classes", time: "All day", desc: "Fall semester officially begins at YSU." },
-  { date: "2026-08-30", title: "TBT Sunday School — Better Together, Talk 6", time: "11am", venue: "Old North Church", desc: "Friends on a Mission — rescheduled from Aug 23 because of Campus Kickoff. Service at Old North Church is at 9:15am." },
+  { date: "2026-08-30", title: "TBT Sunday School — Better Together, Talk 6", time: "10:55am", venue: "Old North Church", desc: "Friends on a Mission — rescheduled from Aug 23 because of Campus Kickoff. Service at Old North Church is at 9:15am." },
   { date: "2026-08-31", title: "Street Talk / Tabling", time: "Noon", venue: "YSU Campus", desc: "Out on YSU campus." },
   { date: "2026-08-31", title: "Bible Talk & Prayer — Wk 1: Brother / Servant", time: "3:55pm", venue: "Williamson Building, Room 2212", desc: "James 1:1." },
   { date: "2026-09-07", title: "Labor Day — No Campus", time: "", desc: "No Street Talk, Prayer, or Bible Talk this week." },
@@ -65,7 +65,7 @@ var ONE_TIME_EVENTS = CHURCH_CENTER_EVENTS.concat(SEMESTER_SCHEDULE_EVENTS);
 // except on dates already covered above by a specific dated entry (see skipDates).
 // Hand-maintained, same as SEMESTER_SCHEDULE_EVENTS — the sync routine must not touch this.
 var RECURRING_EVENTS = [
-  { dow: 0, title: "Sunday Service + TBT Sunday School", time: "9:15 & 11am", venue: "Old North Church", desc: "Join the service at Old North Church at 9:15am, then stick around for TBT Sunday School at 11am.", startDate: "2026-08-09", skipDates: ["2026-08-09", "2026-08-16", "2026-08-23", "2026-08-30"] },
+  { dow: 0, title: "Sunday Service + TBT Sunday School", time: "9:15 & 10:55am", venue: "Old North Church", desc: "Join the service at Old North Church at 9:15am, then stick around for TBT Sunday School at 10:55am.", startDate: "2026-08-09", skipDates: ["2026-08-09", "2026-08-16", "2026-08-23", "2026-08-30"] },
   { dow: 1, title: "Bible Quads + Home Groups", time: "All week", venue: "Various locations, Mahoning Valley", desc: "Small groups reading a book of the Bible together, on whatever day and time works for you.", links: [{ text: "Sign up for a Quad →", href: "https://old-north.cls.co/GKgy" }, { text: "Sign up for a Home Group →", href: "https://old-north.cls.co/qMTj" }], startDate: "2026-08-31", standing: true }
 ];
 
