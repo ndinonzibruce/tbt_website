@@ -1,0 +1,614 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//The Bible Talks//tbtysu.org//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:The Bible Talks (YSU)
+X-WR-TIMEZONE:America/New_York
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VTIMEZONE
+TZID:America/New_York
+BEGIN:DAYLIGHT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+TZNAME:EDT
+DTSTART:19700308T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+TZNAME:EST
+DTSTART:19701101T020000
+RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:20261018-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261018T091500
+DTEND;TZID=America/New_York:20261018T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261018-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261018T105500
+DTEND;TZID=America/New_York:20261018T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261019-street-talk@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261019T120000
+DTEND;TZID=America/New_York:20261019T130000
+SUMMARY:Street Talk
+LOCATION:YSU Campus
+DESCRIPTION:Out on YSU campus.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261019-bible-talk-prayer-wk-7-false-wisdom-true-wisdom@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261019T155500
+DTEND;TZID=America/New_York:20261019T165500
+SUMMARY:Bible Talk & Prayer — Wk 7: False Wisdom / True Wisdom
+LOCATION:Williamson Building\, Room 2212
+DESCRIPTION:James 3:13–18.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261025-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261025T091500
+DTEND;TZID=America/New_York:20261025T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261025-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261025T105500
+DTEND;TZID=America/New_York:20261025T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261026-prayer-for-campus@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261026T120000
+DTEND;TZID=America/New_York:20261026T130000
+SUMMARY:Prayer for Campus
+LOCATION:YSU Campus
+DESCRIPTION:Out on YSU campus.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261026-bible-talk-prayer-wk-8-worldliness-godliness@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261026T155500
+DTEND;TZID=America/New_York:20261026T165500
+SUMMARY:Bible Talk & Prayer — Wk 8: Worldliness / Godliness
+LOCATION:Williamson Building\, Room 2212
+DESCRIPTION:James 4:1–10.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261030-game-night@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261030T180000
+DTEND;TZID=America/New_York:20261030T210000
+SUMMARY:Game Night
+LOCATION:Old North Church
+DESCRIPTION:A night of games and hanging out together.\n\nThe Bible Talks 
+ · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261101-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261101T091500
+DTEND;TZID=America/New_York:20261101T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261101-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261101T105500
+DTEND;TZID=America/New_York:20261101T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261102-street-talk@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261102T120000
+DTEND;TZID=America/New_York:20261102T130000
+SUMMARY:Street Talk
+LOCATION:YSU Campus
+DESCRIPTION:Out on YSU campus.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261102-bible-talk-prayer-wk-9-arrogance-humility@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261102T155500
+DTEND;TZID=America/New_York:20261102T165500
+SUMMARY:Bible Talk & Prayer — Wk 9: Arrogance / Humility
+LOCATION:Williamson Building\, Room 2212
+DESCRIPTION:James 4:11–17.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261108-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261108T091500
+DTEND;TZID=America/New_York:20261108T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261108-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261108T105500
+DTEND;TZID=America/New_York:20261108T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261109-prayer-for-campus@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261109T120000
+DTEND;TZID=America/New_York:20261109T130000
+SUMMARY:Prayer for Campus
+LOCATION:YSU Campus
+DESCRIPTION:Out on YSU campus.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261109-bible-talk-prayer-wk-10-oppressor-laborer@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261109T155500
+DTEND;TZID=America/New_York:20261109T165500
+SUMMARY:Bible Talk & Prayer — Wk 10: Oppressor / Laborer
+LOCATION:Williamson Building\, Room 2212
+DESCRIPTION:James 5:1–6.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261115-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261115T091500
+DTEND;TZID=America/New_York:20261115T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261115-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261115T105500
+DTEND;TZID=America/New_York:20261115T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261116-street-talk@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261116T120000
+DTEND;TZID=America/New_York:20261116T130000
+SUMMARY:Street Talk
+LOCATION:YSU Campus
+DESCRIPTION:Out on YSU campus.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261116-bible-talk-prayer-wk-11-suffering-comfort@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261116T155500
+DTEND;TZID=America/New_York:20261116T165500
+SUMMARY:Bible Talk & Prayer — Wk 11: Suffering / Comfort
+LOCATION:Williamson Building\, Room 2212
+DESCRIPTION:James 5:7–12.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261122-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261122T091500
+DTEND;TZID=America/New_York:20261122T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261122-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261122T105500
+DTEND;TZID=America/New_York:20261122T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261123-prayer-for-campus@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261123T120000
+DTEND;TZID=America/New_York:20261123T130000
+SUMMARY:Prayer for Campus
+LOCATION:YSU Campus
+DESCRIPTION:Out on YSU campus.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261123-bible-talk-prayer-wk-12-faithful-faithless@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261123T155500
+DTEND;TZID=America/New_York:20261123T165500
+SUMMARY:Bible Talk & Prayer — Wk 12: Faithful / Faithless
+LOCATION:Williamson Building\, Room 2212
+DESCRIPTION:James 5:13–20.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261129-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261129T091500
+DTEND;TZID=America/New_York:20261129T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261129-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261129T105500
+DTEND;TZID=America/New_York:20261129T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261130-grill-the-pastor@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261130T155500
+DTEND;TZID=America/New_York:20261130T165500
+SUMMARY:Grill the Pastor
+LOCATION:YSU Campus
+DESCRIPTION:Out on YSU campus.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261206-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261206T091500
+DTEND;TZID=America/New_York:20261206T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261206-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261206T105500
+DTEND;TZID=America/New_York:20261206T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261211-christmas-party@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261211T190000
+DTEND;TZID=America/New_York:20261211T210000
+SUMMARY:Christmas Party
+LOCATION:Old North Church
+DESCRIPTION:Celebrating the semester together before the break.\n\nThe Bibl
+ e Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261213-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261213T091500
+DTEND;TZID=America/New_York:20261213T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261213-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261213T105500
+DTEND;TZID=America/New_York:20261213T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261220-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261220T091500
+DTEND;TZID=America/New_York:20261220T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261220-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261220T105500
+DTEND;TZID=America/New_York:20261220T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261227-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261227T091500
+DTEND;TZID=America/New_York:20261227T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261227-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20261227T105500
+DTEND;TZID=America/New_York:20261227T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20261230-crosscon-2027@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;VALUE=DATE:20261230
+DTEND;VALUE=DATE:20270103
+SUMMARY:CrossCon 2027
+LOCATION:The Dome at America's Center\, St. Louis\, MO
+DESCRIPTION:A conference for 18–25 year olds in St. Louis. Registration i
+ s $250.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270103-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270103T091500
+DTEND;TZID=America/New_York:20270103T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270103-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270103T105500
+DTEND;TZID=America/New_York:20270103T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270110-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270110T091500
+DTEND;TZID=America/New_York:20270110T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270110-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270110T105500
+DTEND;TZID=America/New_York:20270110T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270117-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270117T091500
+DTEND;TZID=America/New_York:20270117T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270117-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270117T105500
+DTEND;TZID=America/New_York:20270117T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270124-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270124T091500
+DTEND;TZID=America/New_York:20270124T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270124-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270124T105500
+DTEND;TZID=America/New_York:20270124T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270131-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270131T091500
+DTEND;TZID=America/New_York:20270131T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270131-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270131T105500
+DTEND;TZID=America/New_York:20270131T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270207-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270207T091500
+DTEND;TZID=America/New_York:20270207T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270207-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270207T105500
+DTEND;TZID=America/New_York:20270207T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270214-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270214T091500
+DTEND;TZID=America/New_York:20270214T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270214-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270214T105500
+DTEND;TZID=America/New_York:20270214T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270221-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270221T091500
+DTEND;TZID=America/New_York:20270221T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270221-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270221T105500
+DTEND;TZID=America/New_York:20270221T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270228-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270228T091500
+DTEND;TZID=America/New_York:20270228T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270228-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270228T105500
+DTEND;TZID=America/New_York:20270228T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270307-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270307T091500
+DTEND;TZID=America/New_York:20270307T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270307-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270307T105500
+DTEND;TZID=America/New_York:20270307T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270314-sunday-service@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270314T091500
+DTEND;TZID=America/New_York:20270314T101500
+SUMMARY:Sunday Service
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+BEGIN:VEVENT
+UID:20270314-tbt-sunday-school@tbtysu.org
+DTSTAMP:20261016T184728Z
+DTSTART;TZID=America/New_York:20270314T105500
+DTEND;TZID=America/New_York:20270314T115500
+SUMMARY:TBT Sunday School
+LOCATION:Old North Church
+DESCRIPTION:Join the service at Old North Church at 9:15am\, then stick aro
+ und for TBT Sunday School at 10:55am.\n\nThe Bible Talks · tbtysu.org
+END:VEVENT
+END:VCALENDAR

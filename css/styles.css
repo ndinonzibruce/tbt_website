@@ -448,3 +448,46 @@ p.form-note { font-size: 10.5px; color: var(--dim); line-height: 1.5; margin: 10
 .testimonial-more p { margin: 14px 0 0; font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 17px; line-height: 1.55; color: var(--body-text); }
 .testimonial-q { display: block; font-family: 'Nunito Sans', sans-serif; font-style: normal; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; opacity: .7; margin-bottom: 4px; }
 @media (prefers-reduced-motion: reduce) { .testimonial-grid { transition: none; } }
+
+/* ---------- Event pages, add-to-calendar, parents page ---------- */
+.event-facts { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 2px; margin-bottom: 36px; }
+@media (max-width: 720px) { .event-facts { grid-template-columns: 1fr; } }
+.event-fact { background: var(--surface); padding: 28px 32px; }
+.event-fact .fact-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 10px; }
+.event-fact .fact-value { font-size: 20px; line-height: 1.4; color: var(--cream); }
+.event-fact .fact-value span { font-size: 15px; color: var(--muted); }
+.event-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.event-actions .btn { cursor: pointer; }
+.event-links { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; margin-top: 16px; }
+.event-links > a { font-size: 14px; font-weight: 600; color: var(--gold-bright); }
+.event-links > a:hover { color: var(--gold-hover-text); }
+.cal-add { position: relative; display: inline-block; }
+.cal-add summary { list-style: none; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--gold-bright); }
+.cal-add summary::-webkit-details-marker { display: none; }
+.cal-add summary::before { content: "+ "; }
+.cal-add summary:hover { color: var(--gold-hover-text); }
+.event-actions .cal-add summary { border: 1px solid var(--border-ghost); color: var(--cream); padding: 15px 28px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+.event-actions .cal-add summary:hover { border-color: var(--gold); color: var(--gold-bright); }
+.cal-add-menu { position: absolute; z-index: 5; left: 0; top: calc(100% + 6px); min-width: 230px; background: var(--surface-hover); border: 1px solid var(--hairline-gold); display: flex; flex-direction: column; }
+.cal-add-menu a { padding: 12px 16px; font-size: 14px; color: var(--cream); border-bottom: 1px solid var(--hairline); }
+.cal-add-menu a:last-child { border-bottom: 0; }
+.cal-add-menu a:hover { background: rgba(255,255,255,0.05); color: var(--gold-bright); }
+.week-detail + .add-cal { margin-top: 8px; }
+.week-detail + .add-cal .cal-add summary { font-size: 12.5px; }
+.subscribe-line { font-size: 15px; color: var(--body-text); margin: 22px 0 0; }
+.subscribe-line a { color: var(--gold-bright); }
+.faq details { background: var(--surface); margin-bottom: 2px; padding: 0 32px; }
+.faq summary { cursor: pointer; padding: 24px 0; font-size: 19px; color: var(--cream); font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 20px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; color: var(--gold); font-size: 24px; line-height: 1; }
+.faq details[open] summary::after { content: "–"; }
+.faq details p { margin: 0; padding: 0 0 26px; font-size: 17px; line-height: 1.7; color: var(--body-text); max-width: 760px; }
+.faq details p a { color: var(--gold-bright); }
+.two-up { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 2px; }
+@media (max-width: 860px) { .two-up { grid-template-columns: 1fr; } }
+.two-up > div { background: var(--surface); padding: 40px 36px; }
+.two-up h2 { font-size: 28px; color: var(--cream); margin: 0 0 18px; line-height: 1.2; }
+.two-up ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; }
+.two-up li { font-size: 17px; line-height: 1.6; color: var(--body-text); padding-left: 22px; position: relative; }
+.two-up li::before { content: ""; position: absolute; left: 0; top: 0.7em; width: 8px; height: 1px; background: var(--gold); }
+.two-up li strong { color: var(--cream); font-weight: 600; }

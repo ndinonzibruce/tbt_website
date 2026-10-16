@@ -14,6 +14,7 @@ var MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"
 var CHURCH_CENTER_EVENTS = [
   { date: "2026-08-21", title: "Jake and Sam's Farewell Party", time: "5–9pm", venue: "Sevakeen Country Club, Salem, OH", desc: "Food truck, swimming, pickleball, and a prayer send-off at 7:30pm.", link: { text: "Register →", href: "https://old-north-church-17379.churchcenter.com/registrations/events/3807183" } },
   { date: "2026-08-23", title: "Campus Kickoff", time: "11:30am–2pm", venue: "YSU Campus", desc: "Welcome back to campus! Come find out what TBT is all about as we kick off the new school year. No TBT Sunday School this week." },
+  { date: "2026-12-30", endDate: "2027-01-02", title: "CrossCon 2027", time: "All day", venue: "The Dome at America's Center, St. Louis, MO", desc: "A conference for 18–25 year olds in St. Louis. Registration is $250.", link: { text: "Register →", href: "https://old-north-church-17379.churchcenter.com/registrations/signups/3912673" } }
 ];
 
 // === HAND-MAINTAINED SEMESTER SCHEDULE ======================================
@@ -178,6 +179,12 @@ function renderWhatsComingUp(containerId, options) {
     body.appendChild(title);
     if (venue) body.appendChild(venue);
     body.appendChild(desc);
+    if (window.TBTCal && !item.standing && item.time !== "All week") {
+      var calBox = document.createElement("div");
+      calBox.className = "add-cal";
+      window.TBTCal.render(calBox, item);
+      body.appendChild(calBox);
+    }
     row.appendChild(tile);
     row.appendChild(body);
     container.appendChild(row);

@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,500;6..12,600;6..12,700&display=swap" rel="stylesheet" />
 <link rel="icon" type="image/png" href="../images/favicon.png?v=6" />
 <link rel="apple-touch-icon" href="../images/apple-touch-icon.png?v=6" />
-<link rel="stylesheet" href="../css/styles.css?v=12" />
+<link rel="stylesheet" href="../css/styles.css?v=14" />
 <style>
   .link-stack { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 2px; max-width: 900px; margin: 0 auto; }
   @media (max-width: 560px) { .link-stack { grid-template-columns: 1fr; } }
@@ -89,7 +89,7 @@
 <header class="site-header">
   <div class="nav-inner">
     <a href="../index.html" class="wordmark-link" style="flex-direction:row;align-items:center;gap:12px;">
-      <img src="../images/icon.png" alt="" style="height:40px;width:auto;flex-shrink:0;" />
+      <img width="300" height="205" src="../images/icon.webp" alt="" style="height:40px;width:auto;flex-shrink:0;" />
       <span style="display:flex;flex-direction:column;gap:2px;">
         <span class="wordmark">THE BIBLE TALKS</span>
         <span class="tagline">Where God speaks through open Bibles</span>
@@ -111,7 +111,7 @@
 
   <section class="section" style="padding-top:28px;padding-bottom:0;">
     <div class="join-cta">
-      <img class="join-cta-bg" src="../images/band-join-bg.jpg" alt="" style="object-position: 55% 25%;" />
+      <img width="1400" height="933" class="join-cta-bg" src="../images/band-join-bg.webp" alt="" style="object-position: 55% 25%;" />
       <div class="join-cta-overlay"></div>
       <div class="join-cta-content">
         <div class="join-cta-label">30 seconds, right now</div>
@@ -207,9 +207,9 @@
       <div class="eyebrow-row" style="justify-content:center;"><span class="eyebrow-rule"></span><span class="eyebrow-text">Keep Connected</span></div>
     </div>
     <div class="band-photo-strip" style="margin-top:0;">
-      <img src="../images/ig-3.jpg" alt="Students on campus at Bible Talk" />
-      <img src="../images/ig-4.jpg" alt="A student reading her Bible during Bible Talk" />
-      <img src="../images/ig-2.jpg" alt="TBT students talking together on the grass" />
+      <img loading="lazy" decoding="async" width="900" height="900" src="../images/ig-3.webp" alt="Students on campus at Bible Talk" />
+      <img loading="lazy" decoding="async" width="900" height="900" src="../images/ig-4.webp" alt="A student reading her Bible during Bible Talk" />
+      <img loading="lazy" decoding="async" width="900" height="900" src="../images/ig-2.webp" alt="TBT students talking together on the grass" />
     </div>
 
     <div class="link-stack">
@@ -324,7 +324,8 @@
     twlList.appendChild(li);
   });
 </script>
-<script src="../js/whats-coming.js?v=6"></script>
+<script src="../js/add-to-calendar.js"></script>
+<script src="../js/whats-coming.js?v=7"></script>
 <script>
   renderWhatsComingUp("week-rundown", { horizonDays: 16 });
 </script>
