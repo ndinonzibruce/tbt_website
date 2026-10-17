@@ -364,19 +364,8 @@ h2.section-title { font-size: 40px; line-height: 1.12; color: var(--cream); }
 
 /* ---------- Footer ---------- */
 .site-footer { background: var(--ink); border-top: 1px solid var(--hairline-gold); }
-.footer-grid { max-width: var(--max); margin: 0 auto; padding: 64px 32px 40px; display: grid; grid-template-columns: minmax(0,1.4fr) repeat(3, minmax(0,1fr)); gap: 44px; }
-@media (max-width: 1040px) { .footer-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
-@media (max-width: 720px) { .footer-grid { grid-template-columns: 1fr; } }
-.footer-wordmark { font-family: 'Montserrat', var(--font); font-weight: 700; font-size: 19px; letter-spacing: 0.13em; color: var(--cream); }
-.footer-tagline { font-size: 10px; letter-spacing: 0.19em; color: var(--tagline); text-transform: uppercase; margin-top: 4px; }
-.footer-desc { font-size: 15px; line-height: 1.7; color: var(--dim); margin: 24px 0 0; }
-.footer-col-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 18px; }
-.footer-addr { font-size: 15px; line-height: 1.8; color: var(--muted); }
-.footer-links { display: flex; flex-direction: column; gap: 10px; font-size: 15px; list-style: none; margin: 0; padding: 0; }
-.footer-links a { color: var(--muted); }
-.footer-links a:hover { color: var(--gold-bright); }
-.footer-bottom-wrap { max-width: var(--max); margin: 0 auto; padding: 0 32px 40px; }
-.footer-bottom { border-top: 1px solid var(--hairline); padding-top: 24px; font-size: 13px; color: var(--footer-legal); }
+
+.footer-wordmark { font-family: 'Montserrat', var(--font); font-weight: 700; font-size: 17px; letter-spacing: 0.13em; color: var(--cream); }
 
 /* ---------- Watch link (YouTube) ---------- */
 .watch-link { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--gold-bright); margin-top: 14px; }
@@ -491,3 +480,19 @@ p.form-note { font-size: 10.5px; color: var(--dim); line-height: 1.5; margin: 10
 .two-up li { font-size: 17px; line-height: 1.6; color: var(--body-text); padding-left: 22px; position: relative; }
 .two-up li::before { content: ""; position: absolute; left: 0; top: 0.7em; width: 8px; height: 1px; background: var(--gold); }
 .two-up li strong { color: var(--cream); font-weight: 600; }
+
+/* ---------- Footer ---------- */
+.footer-invite { max-width: 760px; margin: 0 auto; padding: 80px 32px 48px; text-align: center; }
+.footer-invite-title { font-size: 30px; line-height: 1.25; color: var(--cream); font-weight: 600; letter-spacing: -0.01em; }
+.footer-invite-times { margin: 16px 0 28px; font-size: 16px; line-height: 1.7; color: var(--muted); }
+.footer-invite-times span { display: block; }
+.footer-invite-links { list-style: none; margin: 28px 0 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 26px; font-size: 15px; }
+.footer-invite-links a { color: var(--muted); }
+.footer-invite-links a:hover { color: var(--gold-bright); }
+.footer-bottom-wrap { max-width: var(--max); margin: 0 auto; padding: 0 32px 40px; }
+.footer-bottom { border-top: 1px solid var(--hairline); padding-top: 28px; display: flex; flex-direction: column; align-items: center; gap: 14px; font-size: 13px; color: var(--footer-legal); text-align: center; }
+.footer-bottom a { color: var(--dim); }
+.footer-bottom a:hover { color: var(--gold-bright); }
+.footer-brand { display: flex; align-items: center; gap: 10px; }
+.footer-brand img { height: 26px; width: auto; }
+@media (max-width: 720px) { .footer-invite { padding: 56px 24px 36px; } .footer-invite-title { font-size: 25px; } .footer-invite .btn { width: 100%; box-sizing: border-box; text-align: center; } }

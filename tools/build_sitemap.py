@@ -19,7 +19,7 @@ pages = []
 for p in sorted(glob.glob("*.html") + glob.glob("*/index.html")):
     if "noindex" in open(p).read():
         continue
-    url = f"{SITE}/" if p == "index.html" else (f"{SITE}/{p[:-len('index.html')]}" if p.endswith("/index.html") else f"{SITE}/{p}")
+    url = f"{SITE}/" if p == "index.html" else (f"{SITE}/{p[:-len('index.html')]}" if p.endswith("/index.html") else f"{SITE}/{p[:-len('.html')]}")
     pages.append((0 if p == "index.html" else 1, url, last_changed(p)))
 pages.sort()
 xml = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']

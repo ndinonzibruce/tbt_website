@@ -25,7 +25,7 @@ EVENTS = [
         place=CHURCH, address=CHURCH_ADDR, price="Free", price_num="0",
         blurb="A night of games and hanging out together at Old North Church. Sign up with your Quad, your Home Group, or individually. Bring a friend, whether or not they'd call themselves a Christian.",
         share_desc="A night of games and hanging out together. Bring a friend.",
-        photo="event-gamenight.jpg", reg_status="closed", reg_url=None,
+        photo="event-gamenight.jpg", reg_status="waitlist", reg_url="https://old-north.cls.co/QwVp",
     ),
     dict(
         slug="christmas-party", title="Christmas Party", kind="Plug",
@@ -151,15 +151,15 @@ def shell_parts():
     head_fonts = re.search(r'<link rel="preconnect".*?rel="stylesheet" />', s, re.S).group(0)
     top = s[s.index('<a class="skip-link"'):s.index("<main")]
     foot = s[s.index("<footer"):s.index("</footer>") + len("</footer>")]
-    fix = lambda h: re.sub(r'(href|src)="(?!https?:|#|mailto:|sms:|tel:|\.\./)([^"]+)"', r'\1="../\2"', h)
+    fix = lambda h: re.sub(r'(href|src)="(?!https?:|/|#|mailto:|sms:|tel:|\.\./)([^"]+)"', r'\1="../\2"', h)
     return head_fonts, fix(top), fix(foot)
 
 
 def action_block(ev):
     if ev["reg_status"] == "open":
         reg = f'<a class="btn btn-gold btn-lg" href="{e(ev["reg_url"])}" target="_blank" rel="noopener">Register</a>'
-    elif ev["reg_status"] == "closed":
-        reg = '<span class="btn btn-inactive btn-lg">Registration closed</span>'
+    elif ev["reg_status"] == "waitlist":
+        reg = f'<a class="btn btn-gold btn-lg" href="{e(ev["reg_url"])}" target="_blank" rel="noopener">Join the waitlist</a>'
     else:
         reg = '<span class="btn btn-inactive btn-lg">Link coming soon</span>'
     loc = f"{ev['place']}, {ev['address']}"
@@ -185,7 +185,7 @@ def jsonld(ev):
             "organizer": {"@type": "Organization", "name": "The Bible Talks", "url": SITE}}
     if ev["reg_status"] == "open":
         data["offers"] = {"@type": "Offer", "price": ev["price_num"], "priceCurrency": "USD", "url": ev["reg_url"], "availability": "https://schema.org/InStock"}
-    elif ev["price_num"] == "0":
+    elif ev["price_num"] == "0":  # free, registration full: no Offer block
         data["isAccessibleForFree"] = True
     return json.dumps(data, ensure_ascii=False, indent=2)
 
@@ -221,7 +221,7 @@ def page(ev, fonts, top, foot):
 {fonts}
 <link rel="icon" type="image/png" href="../images/favicon.png?v=6" />
 <link rel="apple-touch-icon" href="../images/apple-touch-icon.png?v=6" />
-<link rel="stylesheet" href="../css/styles.css?v=14" />
+<link rel="stylesheet" href="../css/styles.css?v=16" />
 <script type="application/ld+json">
 {jsonld(ev)}
 </script>
@@ -241,7 +241,7 @@ def page(ev, fonts, top, foot):
   <section class="section" style="padding-top:48px;">
     <div class="event-facts">{facts_html}</div>
     {action_block(ev)}
-    <p class="event-note"><a href="../events.html">\u2190 All events</a> \u00b7 Plugs are announced on Instagram first. <a href="https://instagram.com/thebibletalksysu" target="_blank" rel="noopener">Follow us there \u2192</a></p>
+    <p class="event-note"><a href="/events">\u2190 All events</a> \u00b7 Plugs are announced on Instagram first. <a href="https://instagram.com/thebibletalksysu" target="_blank" rel="noopener">Follow us there \u2192</a></p>
   </section>
 
 </main>
