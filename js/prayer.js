@@ -1,5 +1,7 @@
 // Prayer wall: shows requests, lets people say "I prayed", report a request, and share one.
-// Used by /prayer (form + wall) and /band (a short read-only list).
+// Posters get a private link so they can mark their own request answered or remove it.
+// Used by /prayer (form, tabs, topics, "Pray through them") and by the homepage and /band
+// (a short read-only list).
 (function () {
   var ENDPOINT = window.TBT_PRAYER_ENDPOINT || "";
   var host = location.hostname;
@@ -13,12 +15,23 @@
   var soon = document.getElementById("prayer-soon");
   if (!wall && !form) return;
 
-  var LIMIT = wall ? parseInt(wall.getAttribute("data-limit") || "50", 10) : 0;
+  var TOPICS = ["Health", "Family", "School", "Faith"];
+  var LIMIT = wall ? parseInt(wall.getAttribute("data-limit") || "80", 10) : 0;
+  var FULL = !!document.getElementById("prayer-tabs"); // the full wall page, not a short list
   var loadedAt = Date.now();
+  var state = { requests: [], answered: [], prayers: 0, tab: "needs", topic: "", focus: false };
+
   var store = {
-    get: function (k) { try { return JSON.parse(localStorage.getItem(k) || "[]"); } catch (e) { return []; } },
-    add: function (k, v) { try { var a = this.get(k); if (a.indexOf(v) === -1) { a.push(v); localStorage.setItem(k, JSON.stringify(a.slice(-300))); } } catch (e) {} }
+    list: function (k) { try { return JSON.parse(localStorage.getItem(k) || "[]"); } catch (e) { return []; } },
+    add: function (k, v) { try { var a = this.list(k); if (a.indexOf(v) === -1) { a.push(v); localStorage.setItem(k, JSON.stringify(a.slice(-300))); } } catch (e) {} },
+    mine: function () { try { return JSON.parse(localStorage.getItem("tbtMine") || "{}"); } catch (e) { return {}; } },
+    setMine: function (id, token) { try { var m = this.mine(); m[id] = token; localStorage.setItem("tbtMine", JSON.stringify(m)); } catch (e) {} },
+    dropMine: function (id) { try { var m = this.mine(); delete m[id]; localStorage.setItem("tbtMine", JSON.stringify(m)); } catch (e) {} }
   };
+
+  // A private link from another device looks like /prayer#mine=ID:TOKEN. Remember it, then clean the address bar.
+  var hm = /^#mine=([A-Za-z0-9]+):([0-9a-f]+)$/.exec(location.hash);
+  if (hm) { store.setMine(hm[1], hm[2]); try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {} }
 
   if (!ENDPOINT) {
     if (soon) soon.hidden = false;
@@ -35,6 +48,7 @@
     return fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) })
       .then(function (r) { return r.json(); });
   }
+  function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
 
   function ago(iso) {
     var s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
@@ -44,30 +58,24 @@
     return d + (d === 1 ? " day ago" : " days ago");
   }
 
+  // ---------- one request card ----------
   function card(r) {
-    var el = document.createElement("article");
-    el.className = "prayer-card";
-    el.setAttribute("data-id", r.id);
+    var art = el("article", "prayer-card" + (r.answered ? " is-answered" : ""));
+    art.setAttribute("data-id", r.id);
+    if (r.answered) art.appendChild(el("span", "prayer-badge", "Answered"));
+    if (r.topic && FULL) art.appendChild(el("div", "prayer-topic", r.topic));
+    art.appendChild(el("p", "prayer-text", r.text));
+    if (r.answered && r.update) art.appendChild(el("p", "prayer-update", r.update));
 
-    var text = document.createElement("p");
-    text.className = "prayer-text";
-    text.textContent = r.text;
+    var meta = el("div", "prayer-meta");
+    meta.appendChild(el("span", null, r.name + " · " + ago(r.ts)));
+    var actions = el("div", "prayer-actions");
 
-    var meta = document.createElement("div");
-    meta.className = "prayer-meta";
-    var who = document.createElement("span");
-    who.textContent = r.name + " · " + ago(r.ts);
-    meta.appendChild(who);
-
-    var actions = document.createElement("div");
-    actions.className = "prayer-actions";
-
-    var pray = document.createElement("button");
+    var pray = el("button", "pray-btn");
     pray.type = "button";
-    pray.className = "pray-btn";
     var count = r.prayed || 0;
     function label(done) { pray.textContent = (done ? "You prayed" : "I prayed") + (count ? " · " + count : ""); }
-    var done = store.get("tbtPrayed").indexOf(r.id) !== -1;
+    var done = store.list("tbtPrayed").indexOf(r.id) !== -1;
     label(done);
     if (done) pray.disabled = true;
     pray.addEventListener("click", function () {
@@ -76,66 +84,243 @@
       store.add("tbtPrayed", r.id);
       api({ action: "pray", id: r.id }).then(function (res) { if (res && res.ok && res.count) { count = res.count; label(true); } }).catch(function () {});
     });
+    actions.appendChild(pray);
 
-    var report = document.createElement("button");
-    report.type = "button";
-    report.className = "report-btn";
-    report.textContent = "Report";
-    report.addEventListener("click", function () {
-      if (!window.confirm("Report this request? It is hidden automatically once enough people flag it.")) return;
-      store.add("tbtReported", r.id);
-      el.hidden = true;
-      api({ action: "report", id: r.id }).catch(function () {});
+    var token = store.mine()[r.id];
+    if (!token) {
+      var report = el("button", "report-btn", "Report");
+      report.type = "button";
+      report.addEventListener("click", function () {
+        if (!window.confirm("Report this request? It is hidden automatically once enough people flag it.")) return;
+        store.add("tbtReported", r.id);
+        art.hidden = true;
+        api({ action: "report", id: r.id }).catch(function () {});
+      });
+      actions.appendChild(report);
+    }
+    meta.appendChild(actions);
+    art.appendChild(meta);
+    if (token && FULL) art.appendChild(ownerControls(r, token, art));
+    return art;
+  }
+
+  // ---------- the poster's own controls ----------
+  function ownerControls(r, token, art) {
+    var box = el("div", "prayer-owner");
+    var msg = el("p", "prayer-owner-msg");
+    msg.setAttribute("role", "status");
+    var row = el("div", "prayer-owner-row");
+
+    var mark = el("button", "owner-btn", r.answered ? "Undo answered" : "Mark as answered");
+    mark.type = "button";
+    var rm = el("button", "owner-link", "Remove my request");
+    rm.type = "button";
+
+    var panel = el("div", "prayer-owner-panel");
+    panel.hidden = true;
+    var ta = el("textarea");
+    ta.maxLength = 200; ta.rows = 2; ta.placeholder = "How did God answer? (optional, 200 characters)";
+    ta.setAttribute("aria-label", "How was this prayer answered");
+    var ok = el("button", "owner-btn", "Mark answered"); ok.type = "button";
+    var cancel = el("button", "owner-link", "Cancel"); cancel.type = "button";
+    panel.appendChild(ta);
+    var prow = el("div", "prayer-owner-row"); prow.appendChild(ok); prow.appendChild(cancel); panel.appendChild(prow);
+
+    mark.addEventListener("click", function () {
+      msg.textContent = "";
+      if (r.answered) {
+        mark.disabled = true;
+        api({ action: "answer", id: r.id, token: token, undo: true }).then(function (res) {
+          if (res && res.ok) { setAnswered(r.id, false, ""); } else { msg.textContent = (res && res.error) || "That didn't go through."; mark.disabled = false; }
+        }).catch(function () { msg.textContent = "That didn't go through. Please try again."; mark.disabled = false; });
+      } else { panel.hidden = !panel.hidden; if (!panel.hidden) ta.focus(); }
+    });
+    cancel.addEventListener("click", function () { panel.hidden = true; });
+    ok.addEventListener("click", function () {
+      ok.disabled = true; msg.textContent = "";
+      api({ action: "answer", id: r.id, token: token, update: ta.value }).then(function (res) {
+        if (res && res.ok) { setAnswered(r.id, true, res.update || ""); }
+        else { msg.textContent = (res && res.error) || "That didn't go through."; ok.disabled = false; }
+      }).catch(function () { msg.textContent = "That didn't go through. Please try again."; ok.disabled = false; });
+    });
+    rm.addEventListener("click", function () {
+      if (!window.confirm("Remove your request from the wall? This can't be undone.")) return;
+      api({ action: "remove", id: r.id, token: token }).then(function (res) {
+        if (res && res.ok) { store.dropMine(r.id); drop(r.id); }
+        else { msg.textContent = (res && res.error) || "That didn't go through."; }
+      }).catch(function () { msg.textContent = "That didn't go through. Please try again."; });
     });
 
-    actions.appendChild(pray);
-    actions.appendChild(report);
-    meta.appendChild(actions);
-    el.appendChild(text);
-    el.appendChild(meta);
-    return el;
+    row.appendChild(mark); row.appendChild(rm);
+    box.appendChild(row); box.appendChild(panel); box.appendChild(msg);
+    return box;
   }
 
-  function render(list) {
+  function findIn(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return i; return -1; }
+  function setAnswered(id, answered, update) {
+    var from = answered ? state.requests : state.answered, to = answered ? state.answered : state.requests;
+    var i = findIn(from, id);
+    if (i === -1) return;
+    var item = from.splice(i, 1)[0];
+    item.answered = answered; item.update = update || "";
+    to.unshift(item);
+    if (answered) state.tab = "answered";
+    render();
+  }
+  function drop(id) {
+    var i = findIn(state.requests, id); if (i !== -1) state.requests.splice(i, 1);
+    i = findIn(state.answered, id); if (i !== -1) state.answered.splice(i, 1);
+    render();
+  }
+
+  // ---------- rendering ----------
+  function visible(list) {
+    var hidden = store.list("tbtReported");
+    return list.filter(function (r) { return hidden.indexOf(r.id) === -1 && (!state.topic || r.topic === state.topic); });
+  }
+
+  function render() {
+    if (!wall) return;
+    if (!FULL) { renderShort(); return; }
+    var tabs = document.getElementById("prayer-tabs"), chips = document.getElementById("prayer-chips");
+    var stat = document.getElementById("prayer-stat"), fbtn = document.getElementById("prayer-focus-btn");
+
+    if (stat) { stat.hidden = !state.prayers; stat.textContent = state.prayers + (state.prayers === 1 ? " prayer" : " prayers") + " lifted up so far"; }
+
+    tabs.textContent = "";
+    [["needs", "Needs prayer", state.requests.length], ["answered", "Answered", state.answered.length]].forEach(function (t) {
+      var b = el("button", "prayer-tab" + (state.tab === t[0] ? " is-on" : ""), t[1] + " · " + t[2]);
+      b.type = "button"; b.setAttribute("role", "tab"); b.setAttribute("aria-selected", String(state.tab === t[0]));
+      b.addEventListener("click", function () { state.tab = t[0]; state.focus = false; render(); });
+      tabs.appendChild(b);
+    });
+
+    chips.textContent = "";
+    [""].concat(TOPICS).forEach(function (t) {
+      var b = el("button", "prayer-chip" + (state.topic === t ? " is-on" : ""), t || "All");
+      b.type = "button"; b.setAttribute("aria-pressed", String(state.topic === t));
+      b.addEventListener("click", function () { state.topic = t; state.focus = false; render(); });
+      chips.appendChild(b);
+    });
+
+    var list = visible(state.tab === "needs" ? state.requests : state.answered);
+    if (fbtn) fbtn.hidden = !(state.tab === "needs" && list.length > 0);
+    var panel = document.getElementById("prayer-focus");
+    if (state.focus && state.tab === "needs") { wall.hidden = true; if (panel) { panel.hidden = false; renderFocus(list); } return; }
+    state.focus = false;
+    wall.hidden = false; if (panel) panel.hidden = true;
+
     wall.textContent = "";
-    var hidden = store.get("tbtReported");
-    var shown = list.filter(function (r) { return hidden.indexOf(r.id) === -1; }).slice(0, LIMIT);
-    if (!shown.length) {
-      var p = document.createElement("p");
-      p.className = "prayer-empty";
-      p.textContent = "No requests yet. Be the first to share one.";
-      wall.appendChild(p);
+    if (!list.length) {
+      var msg = state.tab === "answered" ? "Answered prayers will show up here." : (state.topic ? "No requests in this topic yet." : "No requests yet. Be the first to share one.");
+      wall.appendChild(el("p", "prayer-empty", msg));
       return;
     }
-    shown.forEach(function (r) { wall.appendChild(card(r)); });
+    list.forEach(function (r) { wall.appendChild(card(r)); });
   }
 
+  function renderShort() {
+    var list = visible(state.requests).slice(0, LIMIT);
+    wall.textContent = "";
+    if (!list.length) { wall.appendChild(el("p", "prayer-empty", "No requests yet. Be the first to share one.")); return; }
+    list.forEach(function (r) { wall.appendChild(card(r)); });
+  }
+
+  // ---------- "Pray through them" ----------
+  var queue = [], qi = 0;
+  function startFocus(list) {
+    var prayed = store.list("tbtPrayed");
+    var fresh = list.filter(function (r) { return prayed.indexOf(r.id) === -1; });
+    var rest = list.filter(function (r) { return prayed.indexOf(r.id) !== -1; });
+    queue = fresh.concat(rest); qi = 0; state.focus = true; render();
+    var p = document.getElementById("prayer-focus"); if (p && p.scrollIntoView) p.scrollIntoView({ block: "center", behavior: "smooth" });
+  }
+  function renderFocus() {
+    var panel = document.getElementById("prayer-focus");
+    panel.textContent = "";
+    if (qi >= queue.length) {
+      panel.appendChild(el("p", "prayer-focus-done", "That's all of them. Thank you for praying."));
+      var back = el("button", "btn btn-ghost btn-md", "Back to the wall"); back.type = "button";
+      back.addEventListener("click", function () { state.focus = false; render(); });
+      panel.appendChild(back); return;
+    }
+    var r = queue[qi];
+    var bar = el("div", "prayer-focus-bar"); var fill = el("i"); fill.style.width = Math.round((qi / queue.length) * 100) + "%"; bar.appendChild(fill);
+    panel.appendChild(bar);
+    panel.appendChild(el("div", "prayer-focus-count", "Request " + (qi + 1) + " of " + queue.length));
+    var big = el("div", "prayer-focus-card");
+    if (r.topic) big.appendChild(el("div", "prayer-topic", r.topic));
+    big.appendChild(el("p", "prayer-focus-text", r.text));
+    big.appendChild(el("div", "prayer-focus-by", r.name + " · " + ago(r.ts)));
+    panel.appendChild(big);
+    var row = el("div", "prayer-focus-row");
+    var pray = el("button", "btn btn-gold btn-lg", "I prayed"); pray.type = "button";
+    pray.addEventListener("click", function () {
+      if (store.list("tbtPrayed").indexOf(r.id) === -1) { store.add("tbtPrayed", r.id); r.prayed = (r.prayed || 0) + 1; state.prayers += 1; api({ action: "pray", id: r.id }).catch(function () {}); }
+      qi += 1; renderFocus();
+    });
+    var next = el("button", "btn btn-ghost btn-lg", "Next →"); next.type = "button";
+    next.addEventListener("click", function () { qi += 1; renderFocus(); });
+    row.appendChild(pray); row.appendChild(next); panel.appendChild(row);
+    var exit = el("button", "owner-link", "Back to the list"); exit.type = "button";
+    exit.addEventListener("click", function () { state.focus = false; render(); });
+    panel.appendChild(exit);
+  }
+  var fbtn0 = document.getElementById("prayer-focus-btn");
+  if (fbtn0) fbtn0.addEventListener("click", function () { startFocus(visible(state.requests)); });
+
+  // ---------- loading ----------
   function load() {
-    if (!wall) return;
+    if (!wall) return Promise.resolve();
     return fetch(ENDPOINT + (ENDPOINT.indexOf("?") === -1 ? "?" : "&") + "action=list")
       .then(function (r) { return r.json(); })
-      .then(function (res) { if (res && res.ok) render(res.requests || []); else throw new Error("bad"); })
+      .then(function (res) {
+        if (!(res && res.ok)) throw new Error("bad");
+        state.requests = res.requests || []; state.answered = res.answered || []; state.prayers = res.prayers || 0;
+        render();
+      })
       .catch(function () {
         wall.textContent = "";
-        var p = document.createElement("p");
-        p.className = "prayer-empty";
-        p.textContent = "The prayer wall couldn't load right now. Please try again in a bit.";
-        wall.appendChild(p);
+        wall.appendChild(el("p", "prayer-empty", "The prayer wall couldn't load right now. Please try again in a bit."));
       });
   }
   load();
-  if (wall) setInterval(function () { if (document.visibilityState === "visible" && !document.activeElement.matches("textarea, input")) load(); }, 90000);
+  if (wall) setInterval(function () {
+    var a = document.activeElement;
+    if (document.visibilityState === "visible" && !state.focus && !(a && a.matches && a.matches("textarea, input"))) load();
+  }, 90000);
 
+  // ---------- the share form ----------
   if (!form) return;
   var text = form.querySelector("textarea");
   var counter = document.getElementById("prayer-count");
   var msg = document.getElementById("prayer-msg");
   var send = form.querySelector("button[type=submit]");
+  var manage = document.getElementById("prayer-manage");
   text.addEventListener("input", function () { counter.textContent = text.value.length + " / 500"; });
+
+  function showManage(res) {
+    if (!manage || !res.token) return;
+    var link = location.origin + "/prayer#mine=" + res.id + ":" + res.token;
+    manage.textContent = "";
+    manage.appendChild(el("p", "prayer-manage-title", "Your private link"));
+    manage.appendChild(el("p", "prayer-hint", "This phone will remember your request, so you can mark it answered or remove it right here. To do that from another device, save this link. Don't share it. Anyone who has it can change your request."));
+    var input = el("input"); input.type = "text"; input.readOnly = true; input.value = link; input.setAttribute("aria-label", "Your private link");
+    input.addEventListener("focus", function () { input.select(); });
+    var copy = el("button", "btn btn-ghost btn-md", "Copy link"); copy.type = "button";
+    copy.addEventListener("click", function () {
+      var done = function () { copy.textContent = "Copied"; setTimeout(function () { copy.textContent = "Copy link"; }, 2200); };
+      if (navigator.clipboard) navigator.clipboard.writeText(link).then(done, function () { input.select(); });
+      else input.select();
+    });
+    var row = el("div", "prayer-manage-row"); row.appendChild(input); row.appendChild(copy); manage.appendChild(row);
+    manage.hidden = false;
+  }
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     msg.className = "prayer-msg"; msg.textContent = "";
+    if (manage) manage.hidden = true;
     var fd = new FormData(form);
     send.disabled = true; send.textContent = "Sending…";
     api({
@@ -143,16 +328,22 @@
       name: fd.get("name"),
       anon: fd.get("anon") === "on",
       text: fd.get("text"),
+      topic: fd.get("topic"),
       visibility: fd.get("visibility"),
       website: fd.get("website"),
       elapsed: Date.now() - loadedAt
     }).then(function (res) {
       if (res && res.ok) {
         var team = res.visibility === "team";
+        store.setMine(res.id, res.token);
         msg.className = "prayer-msg ok";
         msg.textContent = team ? "Thank you. Your request was sent to the TBT team. It won't appear on the site." : "Thank you. Your request is on the wall.";
         form.reset(); counter.textContent = "0 / 500";
-        if (!team && wall) { var first = wall.querySelector(".prayer-empty"); if (first) first.remove(); wall.insertBefore(card(res), wall.firstChild); }
+        showManage(res);
+        if (!team && wall) {
+          state.requests.unshift({ id: res.id, name: res.name, text: res.text, ts: res.ts, prayed: 0, topic: res.topic || "", answered: false, update: "" });
+          state.tab = "needs"; state.topic = ""; render();
+        }
       } else {
         msg.className = "prayer-msg err";
         msg.textContent = (res && res.error && res.error !== "spam" && res.error !== "server error") ? res.error : "That didn't go through. Please try again, or text our team.";

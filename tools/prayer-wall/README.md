@@ -20,6 +20,15 @@ Google Sheet through a small Google Apps Script. Until the script's address is p
 
 If you ever change `Code.gs`, redeploy with **Deploy → Manage deployments → pencil → New version**.
 
+## Answered prayers, topics, and the private link
+
+- After posting, a poster gets a private link (also remembered on their phone) to **mark their request answered** with an optional one-line update, **undo** that, or **remove** the request.
+- Only a scrambled version of that link is kept (the **TokenHash** column). Requests posted before this feature have none; mark those answered in the sheet yourself.
+- To do it yourself in the sheet: set **Answered** to `yes` and write the **Update**, or set **Status** to `hidden`.
+- Answered requests stay on the wall for 14 days after being answered (or until the normal 30 days, whichever is later).
+- Topics are Health, Family, School, Faith (change `TOPICS` at the top of `Code.gs` and the chips in `prayer.html`/`js/prayer.js`).
+- After editing `Code.gs`: paste it in, run `setup` once (it only rewrites the header row), then **Deploy → Manage deployments → pencil → New version**.
+
 ## Running it
 
 - Every new request is emailed to `NOTIFY_EMAIL` (top of `Code.gs`).

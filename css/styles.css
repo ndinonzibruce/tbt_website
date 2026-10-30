@@ -534,3 +534,51 @@ p.form-note { font-size: 10.5px; color: var(--dim); line-height: 1.5; margin: 10
 .prayer-feature .prayer-card { background: var(--ink); }
 @media (max-width: 720px) { .prayer-feature { padding: 36px 22px; } .prayer-feature h2 { font-size: 30px; } .prayer-feature .btn { width: 100%; box-sizing: border-box; } }
 .prayer-feature .join-cta-label { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-bright); font-weight: 700; }
+
+/* ---------- Prayer wall: tabs, topics, answered, pray-through, owner controls ---------- */
+.prayer-stat { font-size: 14px; font-weight: 700; color: var(--gold-bright); margin: 0 0 14px; }
+.prayer-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.prayer-tab { background: transparent; border: 1px solid var(--border-inactive); color: var(--muted); font: inherit; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; padding: 11px 18px; cursor: pointer; }
+.prayer-tab.is-on { background: var(--gold); border-color: var(--gold); color: var(--ink); }
+.prayer-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.prayer-chip { background: transparent; border: 1px solid var(--border-inactive); color: var(--body-text); font: inherit; font-size: 13px; padding: 7px 14px; border-radius: 20px; cursor: pointer; }
+.prayer-chip.is-on { border-color: var(--gold-bright); color: var(--gold-bright); }
+#prayer-focus-btn { margin: 4px 0 28px; cursor: pointer; }
+.prayer-topic { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
+.prayer-card.is-answered { border-left: 3px solid var(--gold-bright); background: #1a1812; }
+.prayer-feature .prayer-card.is-answered { background: #1a1812; }
+.prayer-badge { display: inline-block; background: var(--gold); color: var(--ink); font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; padding: 4px 10px; margin-bottom: 12px; }
+.prayer-update { font-size: 16px; line-height: 1.55; color: var(--gold-bright); margin: -6px 0 18px; }
+.topic-pick { display: flex; flex-wrap: wrap; gap: 8px; }
+.topic-opt { margin: 0 !important; cursor: pointer; display: inline-block !important; }
+.topic-opt input { position: absolute; opacity: 0; pointer-events: none; }
+.topic-opt span { display: inline-block; border: 1px solid var(--border-inactive); color: var(--body-text); font-size: 14px; letter-spacing: 0; text-transform: none; padding: 8px 16px; border-radius: 20px; }
+.topic-opt input:checked + span { border-color: var(--gold-bright); color: var(--gold-bright); background: rgba(176,141,79,0.12); }
+.topic-opt input:focus-visible + span { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+.prayer-manage { border: 1px solid var(--hairline-gold); padding: 20px 22px; display: grid; gap: 12px; }
+.prayer-manage-title { margin: 0; font-size: 15px; font-weight: 700; color: var(--cream); }
+.prayer-manage-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.prayer-manage-row input { flex: 1; min-width: 200px; font-size: 14px !important; padding: 10px 12px !important; }
+.prayer-manage-row .btn { cursor: pointer; }
+.prayer-owner { border-top: 1px solid var(--hairline); margin-top: 16px; padding-top: 14px; }
+.prayer-owner-row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.owner-btn { background: transparent; border: 1px solid var(--border-ghost); color: var(--cream); font: inherit; font-size: 13px; font-weight: 700; padding: 8px 14px; cursor: pointer; }
+.owner-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold-bright); }
+.owner-btn:disabled { opacity: .5; cursor: default; }
+.owner-link { background: none; border: 0; padding: 0; color: var(--muted); font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; }
+.owner-link:hover { color: var(--cream); }
+.prayer-owner-panel { margin-top: 12px; display: grid; gap: 10px; }
+.prayer-owner-panel textarea { width: 100%; box-sizing: border-box; background: var(--ink); color: var(--cream); border: 1px solid var(--border-inactive); padding: 10px 12px; font: inherit; font-size: 15px; border-radius: 0; }
+.prayer-owner-msg { font-size: 14px; color: #e59a8a; margin: 8px 0 0; min-height: 0; }
+.prayer-owner-msg:empty { display: none; }
+.prayer-focus { max-width: 760px; display: grid; gap: 18px; justify-items: stretch; }
+.prayer-focus-bar { height: 5px; background: #2a2822; }
+.prayer-focus-bar i { display: block; height: 5px; background: var(--gold); }
+.prayer-focus-count { font-size: 14px; color: var(--muted); }
+.prayer-focus-card { background: var(--surface); border: 1px solid var(--hairline-gold); padding: 36px 32px; }
+.prayer-focus-text { font-size: 26px; line-height: 1.5; color: var(--cream); margin: 0; overflow-wrap: anywhere; }
+.prayer-focus-by { margin-top: 18px; font-size: 14px; color: var(--muted); }
+.prayer-focus-row { display: flex; flex-wrap: wrap; gap: 12px; }
+.prayer-focus-row .btn { flex: 1; min-width: 140px; cursor: pointer; }
+.prayer-focus-done { font-size: 24px; color: var(--cream); margin: 20px 0 8px; }
+@media (max-width: 720px) { .prayer-focus-card { padding: 26px 22px; } .prayer-focus-text { font-size: 22px; } }

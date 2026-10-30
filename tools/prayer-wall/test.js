@@ -14,14 +14,19 @@ var sheetObj = {
   getRange: function (r, c, nr, nc) {
     return {
       getValues: function () { return data.slice(r - 2, r - 2 + nr).map(function (x) { return x.slice(c - 1, c - 1 + nc); }); },
-      setValue: function (v) { data[r - 2][c - 1] = v; }
+      setValue: function (v) { data[r - 2][c - 1] = v; },
+      setValues: function (vals) { for (var i = 0; i < vals.length; i++) { if (r === 1) { return; } for (var j = 0; j < vals[i].length; j++) data[r - 2 + i][c - 1 + j] = vals[i][j]; } }
     };
   }
 };
 var SpreadsheetApp = { getActiveSpreadsheet: function () { return { getSheetByName: function () { return sheetObj; }, insertSheet: function () { return sheetObj; } }; } };
 var CacheService = { getScriptCache: function () { return { get: function (k) { return cacheStore[k] || null; }, put: function (k, v) { cacheStore[k] = v; }, remove: function (k) { delete cacheStore[k]; } }; } };
 var LockService = { getScriptLock: function () { return { waitLock: function () {}, releaseLock: function () {} }; } };
-var Utilities = { getUuid: function () { uuidN++; return "0000000" + uuidN + "-aaaa-bbbb-cccc-dddddddddddd"; } };
+var Utilities = {
+  getUuid: function () { uuidN++; return ("00000000" + uuidN.toString(16)).slice(-8) + "-aaaa-bbbb-cccc-dddddddddddd"; },
+  DigestAlgorithm: { SHA_256: "sha256" },
+  computeDigest: function (alg, str) { var h = []; for (var i = 0; i < 32; i++) { var x = 0; for (var k = 0; k < str.length; k++) x = (x * 31 + str.charCodeAt(k) * (i + 7)) % 251; h.push(i % 2 ? x : x - 128); } return h; }
+};
 var MailApp = { sendEmail: function (to, s, m) { mails.push({ to: to, s: s, m: m }); } };
 var ContentService = { MimeType: { JSON: "json" }, createTextOutput: function (t) { return { text: t, setMimeType: function () { return this; } }; } };
 
@@ -30,7 +35,8 @@ var ContentService = { MimeType: { JSON: "json" }, createTextOutput: function (t
 var pass = 0, fail = 0;
 function check(name, cond) { if (cond) { pass++; } else { fail++; console.log("FAIL: " + name); } }
 function post(o) { return JSON.parse(doPost({ postData: { contents: JSON.stringify(o) } }).text); }
-function list() { cacheStore = {}; return JSON.parse(doGet({ parameter: { action: "list" } }).text).requests; }
+function full() { cacheStore = {}; return JSON.parse(doGet({ parameter: { action: "list" } }).text); }
+function list() { return full().requests; }
 var ok = { action: "submit", name: "Maddie Smith", text: "Please pray for my exams this week.", visibility: "public", elapsed: 9000 };
 
 var r = post(ok);
@@ -83,5 +89,37 @@ check("hourly brake kicks in", many > 0);
 check("wall capped at 50", list().length <= 50);
 check("bad action", post({ action: "zzz" }).ok === false);
 check("GET unknown action", JSON.parse(doGet({ parameter: { action: "x" } }).text).ok === false);
+
+// ---- topics, private link, answered, remove ----
+var tp = post({ action: "submit", name: "Tess", text: "Please pray for my finals this week.", topic: "School", visibility: "public", elapsed: 9000 });
+check("submit returns a token", tp.ok && /^[0-9a-f]{32}$/.test(tp.token));
+check("token is not stored in the clear", JSON.stringify(data).indexOf(tp.token) === -1);
+check("topic saved and listed", list().filter(function (x) { return x.id === tp.id; })[0].topic === "School");
+check("bad topic ignored", post({ action: "submit", text: "Please pray for my sister today.", topic: "<b>x</b>", elapsed: 9000 }).topic === "");
+check("answer with wrong token refused", post({ action: "answer", id: tp.id, token: "nope", update: "Passed" }).ok === false);
+check("answer with no token refused", post({ action: "answer", id: tp.id, update: "Passed" }).ok === false);
+check("answer with another request's token refused", post({ action: "answer", id: tp.id, token: team.token || "x", update: "Passed" }).ok === false);
+check("update with a link refused", post({ action: "answer", id: tp.id, token: tp.token, update: "see http://spam.example" }).ok === false);
+check("update too long refused", post({ action: "answer", id: tp.id, token: tp.token, update: new Array(300).join("a") }).ok === false);
+var an = post({ action: "answer", id: tp.id, token: tp.token, update: "I passed. Thank you for praying." });
+check("owner can mark answered", an.ok && an.answered === true);
+var f = full();
+check("answered leaves the needs-prayer list", !f.requests.some(function (x) { return x.id === tp.id; }));
+check("answered appears in the answered list with its update", f.answered.some(function (x) { return x.id === tp.id && x.update.indexOf("passed") > -1 && x.answered === true; }));
+check("answered email sent", mails.some(function (m) { return m.s.indexOf("Prayer answered") > -1; }));
+check("can still pray for an answered request", post({ action: "pray", id: tp.id }).ok === true);
+check("prayer total is reported", typeof full().prayers === "number" && full().prayers > 0);
+var row = data.filter(function (r) { return r[0] === tp.id; })[0];
+row[1] = new Date(Date.now() - 31 * 86400000).toISOString(); row[11] = new Date(Date.now() - 2 * 86400000).toISOString();
+check("answered 2 days ago stays on the wall even when posted 31 days ago", full().answered.some(function (x) { return x.id === tp.id; }));
+row[11] = new Date(Date.now() - 20 * 86400000).toISOString();
+check("answered 20 days ago (posted 31) drops off", !full().answered.some(function (x) { return x.id === tp.id; }));
+row[1] = new Date(Date.now() - 5 * 86400000).toISOString();
+check("owner can undo answered", post({ action: "answer", id: tp.id, token: tp.token, undo: true }).answered === false && list().some(function (x) { return x.id === tp.id; }));
+check("remove with wrong token refused", post({ action: "remove", id: tp.id, token: "nope" }).ok === false);
+check("owner can remove", post({ action: "remove", id: tp.id, token: tp.token }).ok === true);
+check("removed request is off the wall", !list().some(function (x) { return x.id === tp.id; }) && !full().answered.some(function (x) { return x.id === tp.id; }));
+check("removed row is kept in the sheet", data.some(function (r) { return r[0] === tp.id && r[5] === "removed"; }));
+check("team-only request can be marked answered by its owner", post({ action: "answer", id: team.id, token: team.token, update: "Resolved" }).ok === true);
 check("ids survive Sheets number coercion", /^r/.test(id) && post({ action: "pray", id: id }).ok === true);
 console.log(pass + " passed, " + fail + " failed");
