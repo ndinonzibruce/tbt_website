@@ -24,7 +24,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,500;6..12,600;6..12,700&display=swap" rel="stylesheet" />
 <link rel="icon" type="image/png" href="images/favicon.png?v=6" />
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png?v=6" />
-<link rel="stylesheet" href="css/styles.css?v=22" />
+<link rel="stylesheet" href="css/styles.css?v=24" />
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -109,13 +109,10 @@
     <div id="prayer-wall-head">
       <h2 class="section-title" style="margin-bottom:12px;">Prayer requests</h2>
       <p class="prayer-hint" style="margin:0 0 20px;">Newest first. If a request is inappropriate, tap Report.</p>
-      <div id="prayer-stat" class="prayer-stat" hidden></div>
-      <div id="prayer-tabs" class="prayer-tabs" role="tablist"></div>
-      <div id="prayer-chips" class="prayer-chips"></div>
-      <button type="button" id="prayer-focus-btn" class="btn btn-ghost btn-md" hidden>Pray through them →</button>
+      <button type="button" id="prayer-focus-btn" class="prayer-focus-link" hidden>Pray through them one at a time →</button>
     </div>
     <div id="prayer-focus" class="prayer-focus" hidden></div>
-    <div id="prayer-wall" data-limit="80" aria-live="polite"><p class="prayer-empty">Loading prayer requests…</p></div>
+    <div id="prayer-wall" data-limit="80" data-full="1" aria-live="polite"><p class="prayer-empty">Loading prayer requests…</p></div>
     <noscript><p class="prayer-hint">The prayer wall needs JavaScript. You can also text our team at (234) 297-7413.</p></noscript>
   </section>
 
