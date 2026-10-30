@@ -19,7 +19,7 @@
 <link rel="canonical" href="https://tbtysu.org/" />
 <link rel="icon" type="image/png" href="images/favicon.png?v=6" />
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png?v=6" />
-<link rel="stylesheet" href="css/styles.css?v=20" />
+<link rel="stylesheet" href="css/styles.css?v=21" />
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -194,6 +194,17 @@
     </div>
   </section>
 
+  <section class="section" id="prayer-section" style="padding-top:0;padding-bottom:64px;">
+    <div class="prayer-feature" style="max-width:900px;">
+      <div class="join-cta-label">New</div>
+      <h2>Pray for each other</h2>
+      <p class="prayer-feature-lead">Share what you're carrying, and pray for what others have shared. Tap <strong>I prayed</strong> so they know someone did.</p>
+      <a class="btn btn-gold btn-lg" href="/prayer">Share a prayer request →</a>
+      <div id="prayer-wall" data-limit="3" aria-live="polite" style="margin-top:32px;text-align:left;"><p class="prayer-empty">Loading prayer requests…</p></div>
+      <p style="margin:22px 0 0;"><a class="watch-link" href="/prayer" style="margin-top:0;">See all prayer requests →</a></p>
+    </div>
+  </section>
+
   <section class="photo-strip-grid">
     <div class="photo-strip-item"><img loading="lazy" decoding="async" width="1066" height="1600" src="images/strip-campus.webp" alt="Students talking on the YSU campus" style="width:100%;height:100%;object-fit:cover;" /></div>
     <div class="photo-strip-item"><img loading="lazy" decoding="async" width="1200" height="800" src="images/strip-bibletalk.webp" alt="Students at Bible Talk and Prayer" style="width:100%;height:100%;object-fit:cover;" /></div>
@@ -306,6 +317,8 @@
 <script src="js/add-to-calendar.js"></script>
 <script src="js/whats-coming.js?v=7"></script>
 <script src="js/testimonials.js"></script>
+<script src="js/prayer-config.js"></script>
+<script src="js/prayer.js"></script>
 <script>
   renderWhatsComingUp("home-week-rundown", { maxItems: 5, horizonDays: 31 });
 </script>

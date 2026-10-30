@@ -533,3 +533,4 @@ p.form-note { font-size: 10.5px; color: var(--dim); line-height: 1.5; margin: 10
 .prayer-feature-lead { font-size: 18px; line-height: 1.7; color: var(--body-text); margin: 0 auto 28px; max-width: 560px; }
 .prayer-feature .prayer-card { background: var(--ink); }
 @media (max-width: 720px) { .prayer-feature { padding: 36px 22px; } .prayer-feature h2 { font-size: 30px; } .prayer-feature .btn { width: 100%; box-sizing: border-box; } }
+.prayer-feature .join-cta-label { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-bright); font-weight: 700; }
