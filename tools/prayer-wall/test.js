@@ -9,7 +9,7 @@ function readFile(p) {
 var data = [], cacheStore = {}, mails = [], uuidN = 0;
 var sheetObj = {
   getLastRow: function () { return data.length + 1; },
-  appendRow: function (r) { if (data.length === 0 && r[0] === "ID") { this.headers = r; return; } data.push(r.slice()); },
+  appendRow: function (r) { if (data.length === 0 && r[0] === "ID") { this.headers = r; return; } data.push(r.map(function (v) { return (typeof v === "string" && /^[0-9]+(e[0-9]+)?$/i.test(v)) ? Number(v) : v; })); },
   setFrozenRows: function () {}, setColumnWidth: function () {},
   getRange: function (r, c, nr, nc) {
     return {
@@ -83,4 +83,5 @@ check("hourly brake kicks in", many > 0);
 check("wall capped at 50", list().length <= 50);
 check("bad action", post({ action: "zzz" }).ok === false);
 check("GET unknown action", JSON.parse(doGet({ parameter: { action: "x" } }).text).ok === false);
+check("ids survive Sheets number coercion", /^r/.test(id) && post({ action: "pray", id: id }).ok === true);
 console.log(pass + " passed, " + fail + " failed");

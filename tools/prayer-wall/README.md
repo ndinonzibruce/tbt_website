@@ -1,5 +1,8 @@
 # TBT prayer wall: setup
 
+Status: set up and deployed (Google account ndinonzibruce@gmail.com, sheet "TBT Prayer Wall"). The address is already in `js/prayer-config.js`.
+The steps below are for rebuilding it or moving it to a different account.
+
 The website pages (`/prayer` and the "Pray for Each Other" section on `/band`) read and write to a
 Google Sheet through a small Google Apps Script. Until the script's address is pasted into
 `js/prayer-config.js`, the prayer page shows "opening soon" and the band section stays hidden.

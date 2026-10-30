@@ -120,7 +120,8 @@ function submit(body, now) {
   var v = validate(body, recent);
   if (!v.ok) return v;
 
-  var id = Utilities.getUuid().replace(/-/g, "").slice(0, 8);
+  // The "r" keeps Sheets from turning an all-digit ID into a number and dropping leading zeros.
+  var id = "r" + Utilities.getUuid().replace(/-/g, "").slice(0, 8);
   var time = new Date(now).toISOString();
   sheet().appendRow([id, time, v.name, v.text, v.visibility, "live", 0, 0]);
   cache.put(bucket, String(count + 1), 3600);
