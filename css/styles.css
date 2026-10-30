@@ -496,3 +496,34 @@ p.form-note { font-size: 10.5px; color: var(--dim); line-height: 1.5; margin: 10
 .footer-brand { display: flex; align-items: center; gap: 10px; }
 .footer-brand img { height: 26px; width: auto; }
 @media (max-width: 720px) { .footer-invite { padding: 56px 24px 36px; } .footer-invite-title { font-size: 25px; } .footer-invite .btn { width: 100%; box-sizing: border-box; text-align: center; } }
+
+/* ---------- Prayer wall ---------- */
+.prayer-form { background: var(--surface); padding: 36px; display: grid; gap: 22px; max-width: 760px; }
+.prayer-form label, .prayer-form legend { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 8px; padding: 0; }
+.prayer-form fieldset { border: 0; margin: 0; padding: 0; }
+.prayer-form input[type=text], .prayer-form textarea { width: 100%; box-sizing: border-box; background: var(--ink); color: var(--cream); border: 1px solid var(--border-inactive); padding: 14px 16px; font: inherit; font-size: 17px; line-height: 1.6; border-radius: 0; }
+.prayer-form textarea { resize: vertical; min-height: 140px; }
+.prayer-form input[type=text]:focus, .prayer-form textarea:focus { outline: none; border-color: var(--gold); }
+.prayer-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 16px; align-items: end; }
+@media (max-width: 720px) { .prayer-row { grid-template-columns: 1fr; } .prayer-form { padding: 24px; } }
+.prayer-check, .prayer-radio { display: flex !important; align-items: flex-start; gap: 10px; text-transform: none !important; letter-spacing: 0 !important; font-size: 16px !important; font-weight: 400 !important; color: var(--body-text) !important; margin: 0 0 10px !important; cursor: pointer; }
+.prayer-check input, .prayer-radio input { margin-top: 5px; accent-color: var(--gold); }
+.prayer-hint { font-size: 14px; line-height: 1.6; color: var(--dim); margin: 0; }
+.prayer-hint a { color: var(--gold-bright); }
+.prayer-count { font-size: 13px; color: var(--dim); text-align: right; margin-top: 6px; }
+.prayer-form .btn { cursor: pointer; justify-self: start; }
+.prayer-msg { font-size: 16px; line-height: 1.6; min-height: 1.6em; margin: 0; }
+.prayer-msg.ok { color: var(--gold-bright); }
+.prayer-msg.err { color: #e59a8a; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.prayer-card { background: var(--surface); padding: 28px 32px; margin-bottom: 2px; }
+.prayer-text { font-size: 18px; line-height: 1.65; color: var(--cream); margin: 0 0 18px; overflow-wrap: anywhere; }
+.prayer-meta { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); }
+.prayer-actions { display: flex; align-items: center; gap: 16px; }
+.pray-btn { background: transparent; border: 1px solid var(--gold); color: var(--gold-bright); font: inherit; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; padding: 9px 16px; cursor: pointer; }
+.pray-btn:hover:not(:disabled) { background: rgba(176,141,79,0.15); }
+.pray-btn:disabled { border-color: var(--border-inactive); color: var(--muted); cursor: default; }
+.report-btn { background: none; border: 0; padding: 0; color: var(--faint); font: inherit; font-size: 12px; text-decoration: underline; cursor: pointer; }
+.report-btn:hover { color: var(--muted); }
+.prayer-empty { color: var(--muted); font-size: 17px; text-align: center; padding: 40px 0; margin: 0; }
+[hidden] { display: none !important; }
