@@ -527,3 +527,9 @@ p.form-note { font-size: 10.5px; color: var(--dim); line-height: 1.5; margin: 10
 .report-btn:hover { color: var(--muted); }
 .prayer-empty { color: var(--muted); font-size: 17px; text-align: center; padding: 40px 0; margin: 0; }
 [hidden] { display: none !important; }
+
+.prayer-feature { max-width: 560px; margin: 0 auto; background: var(--surface); border: 1px solid var(--hairline-gold); padding: 48px 40px; text-align: center; }
+.prayer-feature h2 { font-size: 38px; line-height: 1.15; color: var(--cream); margin: 10px 0 14px; }
+.prayer-feature-lead { font-size: 18px; line-height: 1.7; color: var(--body-text); margin: 0 auto 28px; max-width: 560px; }
+.prayer-feature .prayer-card { background: var(--ink); }
+@media (max-width: 720px) { .prayer-feature { padding: 36px 22px; } .prayer-feature h2 { font-size: 30px; } .prayer-feature .btn { width: 100%; box-sizing: border-box; } }

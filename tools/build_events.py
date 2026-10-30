@@ -221,7 +221,7 @@ def page(ev, fonts, top, foot):
 {fonts}
 <link rel="icon" type="image/png" href="../images/favicon.png?v=6" />
 <link rel="apple-touch-icon" href="../images/apple-touch-icon.png?v=6" />
-<link rel="stylesheet" href="../css/styles.css?v=18" />
+<link rel="stylesheet" href="../css/styles.css?v=20" />
 <script type="application/ld+json">
 {jsonld(ev)}
 </script>
