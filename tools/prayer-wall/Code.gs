@@ -8,7 +8,8 @@
 // them mark their own request answered or remove it. You can do the same in the sheet:
 // set Answered to "yes" and fill in Update, or set Status to "hidden".
 
-var NOTIFY_EMAIL = "bchimani@oldnorthchurch.org"; // gets an email for each new request, report, and answered prayer; "" turns this off
+var NOTIFY_EMAIL = "bchimani@oldnorthchurch.org"; // gets an email for each new request (public and team-only), report, and answered prayer; "" turns this off
+var NOTIFY_BCC = ["oelias@oldnorthchurch.org", "cmercer@oldnorthchurch.org", "ahodge@oldnorthchurch.org"]; // TBT staff, blind copied on the same emails
 var SHEET_NAME = "Requests";
 var WALL_DAYS = 30;          // unanswered requests older than this drop off the public wall (they stay in the sheet)
 var ANSWERED_DAYS = 14;      // an answered request stays on the wall this long after it is marked answered
@@ -244,8 +245,12 @@ function wallPayload(now) {
 }
 
 function notify(subject, message) {
-  if (!NOTIFY_EMAIL) return;
-  try { MailApp.sendEmail(NOTIFY_EMAIL, "TBT prayer wall: " + subject, message); } catch (e) {}
+  var to = NOTIFY_EMAIL || NOTIFY_BCC[0];
+  if (!to) return;
+  var bcc = NOTIFY_BCC.filter(function (a) { return a && a !== to; }).join(",");
+  var mail = { to: to, subject: "TBT prayer wall: " + subject, body: message };
+  if (bcc) mail.bcc = bcc;
+  try { MailApp.sendEmail(mail); } catch (e) { Logger.log("notify failed: " + e); }
 }
 
 function raw(json) { return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON); }

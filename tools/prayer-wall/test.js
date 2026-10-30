@@ -27,7 +27,8 @@ var Utilities = {
   DigestAlgorithm: { SHA_256: "sha256" },
   computeDigest: function (alg, str) { var h = []; for (var i = 0; i < 32; i++) { var x = 0; for (var k = 0; k < str.length; k++) x = (x * 31 + str.charCodeAt(k) * (i + 7)) % 251; h.push(i % 2 ? x : x - 128); } return h; }
 };
-var MailApp = { sendEmail: function (to, s, m) { mails.push({ to: to, s: s, m: m }); } };
+var Logger = { log: function () {} };
+var MailApp = { sendEmail: function (a, b, c) { if (typeof a === "object") mails.push({ to: a.to, bcc: a.bcc, s: a.subject, m: a.body }); else mails.push({ to: a, s: b, m: c }); } };
 var ContentService = { MimeType: { JSON: "json" }, createTextOutput: function (t) { return { text: t, setMimeType: function () { return this; } }; } };
 
 (0, eval)(readFile("tools/prayer-wall/Code.gs"));
@@ -121,5 +122,20 @@ check("owner can remove", post({ action: "remove", id: tp.id, token: tp.token })
 check("removed request is off the wall", !list().some(function (x) { return x.id === tp.id; }) && !full().answered.some(function (x) { return x.id === tp.id; }));
 check("removed row is kept in the sheet", data.some(function (r) { return r[0] === tp.id && r[5] === "removed"; }));
 check("team-only request can be marked answered by its owner", post({ action: "answer", id: team.id, token: team.token, update: "Resolved" }).ok === true);
+
+// ---- notification emails: Pastor Bruce plus three staff on blind copy ----
+var STAFF = ["oelias@oldnorthchurch.org", "cmercer@oldnorthchurch.org", "ahodge@oldnorthchurch.org"];
+function bccOk(m) { return m.bcc && STAFF.every(function (a) { return m.bcc.split(",").indexOf(a) !== -1; }) && m.bcc.indexOf("bchimani") === -1; }
+var newPublic = mails.filter(function (m) { return m.s.indexOf("New prayer request") > -1 && m.s.indexOf("[TEAM ONLY]") === -1; });
+var newTeam = mails.filter(function (m) { return m.s.indexOf("[TEAM ONLY]") > -1; });
+var reports = mails.filter(function (m) { return m.s.indexOf("reported") > -1; });
+var answeredMails = mails.filter(function (m) { return m.s.indexOf("Prayer answered") > -1; });
+check("every notification type was sent", newPublic.length && newTeam.length && reports.length && answeredMails.length);
+check("every email goes to Pastor Bruce as the main recipient", mails.every(function (m) { return m.to === "bchimani@oldnorthchurch.org"; }));
+check("all three staff are blind-copied on public requests", newPublic.every(bccOk));
+check("all three staff are blind-copied on team-only requests", newTeam.every(bccOk));
+check("all three staff are blind-copied on reports", reports.every(bccOk));
+check("all three staff are blind-copied on answered prayers", answeredMails.every(bccOk));
+check("staff addresses are not exposed in the To line", mails.every(function (m) { return m.to.indexOf("oelias") === -1 && m.to.indexOf(",") === -1; }));
 check("ids survive Sheets number coercion", /^r/.test(id) && post({ action: "pray", id: id }).ok === true);
 console.log(pass + " passed, " + fail + " failed");
