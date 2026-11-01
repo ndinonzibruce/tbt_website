@@ -32,9 +32,10 @@ If you ever change `Code.gs`, redeploy with **Deploy → Manage deployments → 
 ## Who gets emails
 
 - **Pastor Bruce** (main recipient) and the **three TBT staff** (blind copy) get an instant email for every new request (public and team-only), report, and answered prayer.
-- **Church leaders** (`NOTIFY_LEADERS`) get only a **daily digest** at about 7am Eastern: new public requests and public requests marked answered from the last day. They never get team-only requests, reports, or the instant emails. The digest is built from public, live rows only. It is sent only when there's something new.
-- The digest runs from a daily time trigger on `sendLeaderDigest` (Apps Script → Triggers). To see what it would say without sending anything, run `previewLeaderDigest` and open the log.
-- Google caps an account at about 100 email recipients a day. The digest uses 17 a day however busy the wall is, which keeps room for the instant staff emails.
+- **Church leaders** (`NOTIFY_LEADERS`) get only a **weekly summary**, Mondays at about 9pm Eastern (a weekly time trigger on `sendLeaderDigest`; the first scheduled one is **Nov 9, 2026**, set by `SUMMARY_STARTS_AT`). It lists new public requests and public requests marked answered since the last summary, with the names the wall shows and no topic labels. They never get team-only requests, reports, or the instant emails. The summary is built from public, live rows only, and is sent only when there's something new.
+- A first summary covering Oct 29 to Nov 1 was sent once by hand (`sendLeaderSummaryNow`) on Nov 1, 2026.
+- To see what the next summary would say without sending anything, run `previewLeaderDigest` and open the log. To send one right now, run `sendLeaderSummaryNow`. `resetDigestWindow` moves the summary's clock back N days (sends nothing).
+- Google caps an account at about 100 email recipients a day. The weekly summary uses 17 recipients a week however busy the wall is, which keeps room for the instant staff emails.
 
 ## Running it
 
