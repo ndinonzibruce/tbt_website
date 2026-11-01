@@ -10,9 +10,10 @@
 
 var NOTIFY_EMAIL = "bchimani@oldnorthchurch.org"; // gets an email for each new request (public and team-only), report, and answered prayer; "" turns this off
 var NOTIFY_BCC = ["oelias@oldnorthchurch.org", "cmercer@oldnorthchurch.org", "ahodge@oldnorthchurch.org"]; // TBT staff, blind copied on the same emails
-// Church leaders get ONLY a daily digest (sendLeaderDigest): new public requests and public requests marked
+// Church leaders get ONLY a weekly summary (sendLeaderDigest): new public requests and public requests marked
 // answered. Never team-only requests, never reports, and never the instant emails above.
 var NOTIFY_LEADERS = ["Aeccourt7@gmail.com", "audreyshannon03@gmail.com", "HoslerBrooke02@gmail.com", "David.m.toepfer@gmail.com", "andrew.lund55@gmail.com", "Jasonrachau@gmail.com", "Drokinj@gmail.com", "Lance7058@gmail.com", "mtlessons@gmail.com", "masondebrosse@gmail.com", "mfabianl1025@gmail.com", "Meaganbarbee2020@gmail.com", "michaelschrock1@gmail.com", "michellemschrock@gmail.com", "sarahdrokin@gmail.com", "shelbie1224@gmail.com"];
+var SUMMARY_STARTS_AT = Date.parse("2026-11-09T00:00:00-05:00"); // the scheduled weekly summary stays quiet before this date; sendLeaderSummaryNow() works any time
 var SHEET_NAME = "Requests";
 var WALL_DAYS = 30;          // unanswered requests older than this drop off the public wall (they stay in the sheet)
 var ANSWERED_DAYS = 14;      // an answered request stays on the wall this long after it is marked answered
@@ -77,11 +78,14 @@ function doPost(e) {
 }
 
 // ---------- cleaning and checks ----------
-function cleanName(raw, anon) {
+// Shows the name as the poster typed it: first name, plus a last name if they gave one. "Anonymous" hides it.
+function cleanName(raw, anon, last) {
   if (anon) return "Anonymous";
   var first = String(raw || "").trim().split(/\s+/)[0] || "";
-  first = first.replace(/[^A-Za-zÀ-ɏ'\-]/g, "").slice(0, 20);
-  return first || "Anonymous";
+  first = first.replace(/[^A-Za-z\u00C0-\u024F'\-]/g, "").slice(0, 20);
+  if (!first) return "Anonymous";
+  var family = String(last || "").replace(/[^A-Za-z\u00C0-\u024F'\- ]/g, "").replace(/\s+/g, " ").trim().slice(0, 30).trim();
+  return family ? first + " " + family : first;
 }
 
 function cleanText(raw) {
@@ -110,7 +114,7 @@ function validate(body, recentTexts) {
   return {
     ok: true,
     text: text,
-    name: cleanName(body.name, body.anon),
+    name: cleanName(body.name, body.anon, body.last),
     visibility: body.visibility === "team" ? "team" : "public",
     topic: cleanTopic(body.topic)
   };
@@ -249,7 +253,7 @@ function wallPayload(now) {
   };
 }
 
-// ---------- daily digest for church leaders (run by a daily time trigger) ----------
+// ---------- weekly summary for church leaders (run by a weekly time trigger) ----------
 // Only public, live requests are ever included. A team-only, hidden, or removed request cannot appear here.
 function digestItems(now, since) {
   var fresh = [], answered = [];
@@ -265,10 +269,10 @@ function digestItems(now, since) {
 }
 
 function digestBody(items) {
-  var out = [];
+  var out = ["Here's what has been shared on the TBT prayer wall since the last summary.", ""];
   if (items.fresh.length) {
     out.push("NEW PRAYER REQUESTS");
-    items.fresh.forEach(function (x) { out.push("\u2022 " + x.name + (x.topic ? " (" + x.topic + ")" : "") + ": " + x.text); });
+    items.fresh.forEach(function (x) { out.push("\u2022 " + x.name + ": " + x.text); });
     out.push("");
   }
   if (items.answered.length) {
@@ -277,25 +281,36 @@ function digestBody(items) {
     out.push("");
   }
   out.push("Pray for them, and tap \"I prayed\" so they know: https://tbtysu.org/prayer");
-  out.push("You get this once a day because you're a TBT leader. Reply to this email if you'd like to stop.");
+  out.push("You get this summary once a week because you're a TBT leader. Reply to this email if you'd like to stop.");
   return out.join("\n");
 }
 
-function sendLeaderDigest() {
+function sendLeaderDigest(force) {
   if (!NOTIFY_LEADERS.length) return;
   var props = PropertiesService.getScriptProperties();
   var now = Date.now();
-  var since = Number(props.getProperty("digestSince")) || (now - 86400000);
+  if (force !== true && now < SUMMARY_STARTS_AT) return; // the time trigger passes an event object, never true
+  var since = Number(props.getProperty("digestSince")) || (now - 7 * 86400000);
   var items = digestItems(now, since);
   if (!items.fresh.length && !items.answered.length) { props.setProperty("digestSince", String(now)); return; }
   var mail = { to: NOTIFY_EMAIL || NOTIFY_LEADERS[0], bcc: NOTIFY_LEADERS.filter(function (a) { return a !== NOTIFY_EMAIL; }).join(","),
-    subject: "TBT prayer wall: " + (items.fresh.length + items.answered.length) + " update" + (items.fresh.length + items.answered.length === 1 ? "" : "s") + " from the last day", body: digestBody(items) };
+    subject: "TBT prayer wall: weekly summary (" + items.fresh.length + " new, " + items.answered.length + " answered)", body: digestBody(items) };
   try { MailApp.sendEmail(mail); props.setProperty("digestSince", String(now)); } catch (e) { Logger.log("digest failed: " + e); } // not advanced on failure, so nothing is lost
+}
+
+// Sends the leaders' summary right now, whatever the start date (run from the editor).
+function sendLeaderSummaryNow() { sendLeaderDigest(true); }
+
+// Run from the editor to make the next summary cover the last N days (default 7). Sends nothing.
+function resetDigestWindow(days) {
+  var d = Number(days) || 7;
+  PropertiesService.getScriptProperties().setProperty("digestSince", String(Date.now() - d * 86400000));
+  Logger.log("The next summary will cover the last " + d + " days.");
 }
 
 // Shows what the next digest would say without sending anything (run from the editor, then open the log).
 function previewLeaderDigest() {
-  var since = Number(PropertiesService.getScriptProperties().getProperty("digestSince")) || (Date.now() - 86400000);
+  var since = Number(PropertiesService.getScriptProperties().getProperty("digestSince")) || (Date.now() - 7 * 86400000);
   var items = digestItems(Date.now(), since);
   Logger.log(items.fresh.length + " new, " + items.answered.length + " answered since " + new Date(since).toISOString() + "\n\n" + digestBody(items));
 }

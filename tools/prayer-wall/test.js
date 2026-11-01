@@ -141,14 +141,14 @@ check("all three staff are blind-copied on reports", reports.every(bccOk));
 check("all three staff are blind-copied on answered prayers", answeredMails.every(bccOk));
 check("staff addresses are not exposed in the To line", mails.every(function (m) { return m.to.indexOf("oelias") === -1 && m.to.indexOf(",") === -1; }));
 
-// ---- leaders: daily digest of PUBLIC items only, never instant emails, never anything private ----
+// ---- leaders: weekly summary of PUBLIC items only, never instant emails, never anything private ----
 var LEADERS = ["Aeccourt7@gmail.com", "mtlessons@gmail.com", "shelbie1224@gmail.com", "andrew.lund55@gmail.com"];
 function hasLeader(str) { return LEADERS.some(function (a) { return String(str || "").toLowerCase().indexOf(a.toLowerCase()) !== -1; }); }
 check("leader list has all 16 leaders", NOTIFY_LEADERS.length === 16 && NOTIFY_LEADERS.every(function (a) { return /@/.test(a); }));
 check("NO instant email (new, team-only, report, answered) ever reaches a leader", mails.every(function (m) { return !hasLeader(m.to) && !hasLeader(m.bcc); }));
 var instantCount = mails.length;
 // fresh baseline, then add one public, one team-only, one hidden, one answered-public, one answered-team
-var now0 = Date.now(); propStore.digestSince = String(now0 - 1000); data.length = data.length; mails.length = 0;
+var realStart = SUMMARY_STARTS_AT; SUMMARY_STARTS_AT = 0; var now0 = Date.now(); propStore.digestSince = String(now0 - 1000); data.length = data.length; mails.length = 0;
 var dPub = post({ action: "submit", name: "Pia", text: "DIGESTPUBLIC please pray for my sister.", topic: "Family", visibility: "public", elapsed: 9000 });
 var dTeam = post({ action: "submit", name: "Tom", text: "DIGESTTEAMONLY a private struggle.", visibility: "team", elapsed: 9000 });
 var dHide = post({ action: "submit", name: "Hal", text: "DIGESTHIDDEN something that gets reported.", visibility: "public", elapsed: 9000 });
@@ -160,16 +160,19 @@ var beforeDigest = mails.length;
 propStore.digestSince = String(now0 - 1000);
 sendLeaderDigest();
 var digestMail = mails[mails.length - 1];
-check("digest was sent as one email", mails.length === beforeDigest + 1 && digestMail.s.indexOf("update") > -1);
+check("summary was sent as one email", mails.length === beforeDigest + 1 && digestMail.s.indexOf("weekly summary") > -1);
+check("subject counts new and answered", /\(\d+ new, \d+ answered\)/.test(digestMail.s));
 check("digest goes to every leader on blind copy", NOTIFY_LEADERS.every(function (a) { return digestMail.bcc.split(",").indexOf(a) !== -1; }));
 check("digest To line is Pastor Bruce only (no leader address exposed)", digestMail.to === "bchimani@oldnorthchurch.org");
 check("digest does not include the staff", STAFF.every(function (a) { return digestMail.bcc.indexOf(a) === -1; }));
-check("digest includes the new public request", digestMail.m.indexOf("DIGESTPUBLIC") > -1 && digestMail.m.indexOf("(Family)") > -1);
+check("summary includes the new public request with its name", digestMail.m.indexOf("DIGESTPUBLIC") > -1 && digestMail.m.indexOf("Pia: DIGESTPUBLIC") > -1);
+check("summary has no topic labels", digestMail.m.indexOf("(Family)") === -1 && digestMail.m.indexOf("Family") === -1);
 check("digest includes the answered public request and its update", digestMail.m.indexOf("DIGESTANSWERED") > -1 && digestMail.m.indexOf("DIGESTUPDATE") > -1);
 check("digest NEVER includes the team-only request", digestMail.m.indexOf("DIGESTTEAMONLY") === -1);
 check("digest NEVER includes a team-only request's answered update", digestMail.m.indexOf("DIGESTTEAMUPDATE") === -1);
 check("digest does not include a request that was hidden by reports", digestMail.m.indexOf("DIGESTHIDDEN") === -1);
-check("digest points to the wall", digestMail.m.indexOf("tbtysu.org/prayer") > -1);
+check("summary points to the wall", digestMail.m.indexOf("tbtysu.org/prayer") > -1);
+check("summary says it is weekly", digestMail.m.indexOf("once a week") > -1 && digestMail.m.indexOf("once a day") === -1);
 var afterFirst = mails.length; sendLeaderDigest();
 check("a second digest right away sends nothing", mails.length === afterFirst);
 var instants = mails.slice(0, beforeDigest);
@@ -181,5 +184,28 @@ var w1 = Date.now(); while (Date.now() - w1 < 6) {} failMail = true; var sinceBe
 check("a failed digest does not advance the clock", propStore.digestSince === sinceBefore);
 var n2 = mails.length; sendLeaderDigest();
 check("the next digest delivers what the failed one missed", mails.length === n2 + 1 && mails[mails.length - 1].m.indexOf("DIGESTRETRY") > -1);
+SUMMARY_STARTS_AT = Date.now() + 86400000 * 5;
+var q0 = mails.length; propStore.digestSince = String(Date.now() - 86400000); cacheStore = {}; var w2 = Date.now(); while (Date.now() - w2 < 6) {} post({ action: "submit", name: "Quin", text: "BEFORESTART please pray for my trip.", visibility: "public", elapsed: 9000 });
+sendLeaderDigest({ type: "time-driven" });
+check("the scheduled run stays quiet before the start date", mails.length === q0 + 1 && !mails.slice(q0).some(function (m) { return m.m.indexOf("BEFORESTART") > -1 && hasLeader(m.bcc); }));
+var sinceHeld = propStore.digestSince; sendLeaderSummaryNow();
+check("sendLeaderSummaryNow works before the start date and includes the waiting request", mails[mails.length - 1].m.indexOf("BEFORESTART") > -1 && hasLeader(mails[mails.length - 1].bcc));
+check("the start date does not move the clock while it holds back", sinceHeld === String(Number(sinceHeld)));
+SUMMARY_STARTS_AT = 0;
+
+// ---- first and last name ----
+cacheStore = {}; mails.length = 0;
+var n1 = post({ action: "submit", name: "Tess", last: "Brooks", text: "NAMETEST1 pray for my sister.", elapsed: 9000 });
+check("first and last name are shown together", n1.ok && n1.name === "Tess Brooks");
+cacheStore = {}; check("the wall lists the full name", list().some(function (x) { return x.id === n1.id && x.name === "Tess Brooks"; }));
+check("staff email shows the full name", mails.some(function (m) { return m.s.indexOf("Tess Brooks") > -1; }));
+cacheStore = {}; check("last name is optional", post({ action: "submit", name: "Sam", text: "NAMETEST2 pray for my finals.", elapsed: 9000 }).name === "Sam");
+cacheStore = {}; check("multi-word last names work", post({ action: "submit", name: "Ana", last: "De La Cruz", text: "NAMETEST3 pray for my mom.", elapsed: 9000 }).name === "Ana De La Cruz");
+cacheStore = {}; check("apostrophes and hyphens are kept", post({ action: "submit", name: "Liam", last: "O'Neil-Smith", text: "NAMETEST4 pray for my job.", elapsed: 9000 }).name === "Liam O'Neil-Smith");
+cacheStore = {}; check("digits and markup are stripped from a last name", /^Kai [A-Za-z ]+$/.test(post({ action: "submit", name: "Kai", last: "Br00ks<b>x</b>", text: "NAMETEST5 pray for my sister.", elapsed: 9000 }).name));
+cacheStore = {}; check("Anonymous hides both names", post({ action: "submit", name: "Zed", last: "Young", anon: true, text: "NAMETEST6 pray for my parents.", elapsed: 9000 }).name === "Anonymous");
+cacheStore = {}; check("a last name with no first name is ignored", post({ action: "submit", last: "Young", text: "NAMETEST7 pray for peace today.", elapsed: 9000 }).name === "Anonymous");
+cacheStore = {}; check("a very long last name is cut to 30 characters", post({ action: "submit", name: "Max", last: new Array(60).join("a"), text: "NAMETEST8 pray for my roommate.", elapsed: 9000 }).name.length <= 20 + 1 + 30);
+cacheStore = {}; check("an old page that sends only a full name in the first field still shows just the first name", post({ action: "submit", name: "Rob Banks", text: "NAMETEST9 pray for my brother.", elapsed: 9000 }).name === "Rob");
 check("ids survive Sheets number coercion", /^r/.test(id) && post({ action: "pray", id: id }).ok === true);
 console.log(pass + " passed, " + fail + " failed");

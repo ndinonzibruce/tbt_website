@@ -24,7 +24,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,500;6..12,600;6..12,700&display=swap" rel="stylesheet" />
 <link rel="icon" type="image/png" href="images/favicon.png?v=6" />
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png?v=6" />
-<link rel="stylesheet" href="css/styles.css?v=24" />
+<link rel="stylesheet" href="css/styles.css?v=25" />
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -69,13 +69,17 @@
     </div>
 
     <form id="prayer-form" class="prayer-form" novalidate>
-      <div class="prayer-row">
+      <div class="prayer-names">
         <div>
           <label for="pf-name">First name (optional)</label>
           <input id="pf-name" name="name" type="text" maxlength="20" autocomplete="given-name" />
         </div>
-        <label class="prayer-check"><input type="checkbox" name="anon" /> Post as Anonymous</label>
+        <div>
+          <label for="pf-last">Last name (optional)</label>
+          <input id="pf-last" name="last" type="text" maxlength="30" autocomplete="family-name" />
+        </div>
       </div>
+      <label class="prayer-check"><input type="checkbox" name="anon" /> Post as Anonymous (your name won't be shown)</label>
       <div>
         <label for="pf-text">Your prayer request</label>
         <textarea id="pf-text" name="text" maxlength="500" required></textarea>
@@ -100,7 +104,7 @@
       <button type="submit" class="btn btn-gold btn-lg">Share request</button>
       <p id="prayer-msg" class="prayer-msg" role="status" aria-live="polite"></p>
       <div id="prayer-manage" class="prayer-manage" hidden></div>
-      <p class="prayer-hint">Please use a first name only, and leave out last names, phone numbers, and private details about other people. Requests on the wall are public and come off after 30 days. Requests marked team only are read by Pastor Bruce and the TBT team. After you post, you get a private link so you can mark your request answered or remove it. See our <a href="/privacy">privacy page</a>.</p>
+      <p class="prayer-hint">Your name shows on the wall just as you enter it, so check Anonymous if you'd rather not be named. Please leave out phone numbers and private details about other people. Requests on the wall are public and come off after 30 days. Requests marked team only are read by Pastor Bruce and the TBT team. After you post, you get a private link so you can mark your request answered or remove it. See our <a href="/privacy">privacy page</a>.</p>
       <p class="prayer-hint">This page isn't watched around the clock. If you or someone you know is in danger or thinking about suicide, call or text <strong>988</strong>, or call <strong>911</strong>.</p>
     </form>
   </section>

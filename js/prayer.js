@@ -315,6 +315,7 @@
     api({
       action: "submit",
       name: fd.get("name"),
+      last: fd.get("last"),
       anon: fd.get("anon") === "on",
       text: fd.get("text"),
       topic: fd.get("topic"),

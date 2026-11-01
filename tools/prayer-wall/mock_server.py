@@ -29,7 +29,9 @@ class H(BaseHTTPRequestHandler):
             if body.get("website") or body.get("elapsed", 0) < 3000: return self._json({"ok": False, "error": "spam"})
             if len(t) < 5: return self._json({"ok": False, "error": "Please write a little more."})
             if re.search(r"https?:|@|\d{10}", t): return self._json({"ok": False, "error": "Please take out links, email addresses and phone numbers."})
-            name = "Anonymous" if body.get("anon") else (str(body.get("name", "")).split() or ["Anonymous"])[0][:20]
+            first = "" if body.get("anon") else (str(body.get("name", "")).split() or [""])[0][:20]
+            last = re.sub(r"[^A-Za-z' \-]", "", str(body.get("last", ""))).strip()[:30]
+            name = (first + (" " + last if last else "")) if first else "Anonymous"
             tok = secrets.token_hex(16)
             r = dict(id="r" + uuid.uuid4().hex[:8], name=name, text=t, ts=now(), visibility="team" if body.get("visibility") == "team" else "public", status="live", prayed=0, reports=0,
                      topic=body.get("topic") if body.get("topic") in TOPICS else "", answered=False, update="", token=h(tok))
