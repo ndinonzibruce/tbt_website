@@ -10,6 +10,9 @@
 
 var NOTIFY_EMAIL = "bchimani@oldnorthchurch.org"; // gets an email for each new request (public and team-only), report, and answered prayer; "" turns this off
 var NOTIFY_BCC = ["oelias@oldnorthchurch.org", "cmercer@oldnorthchurch.org", "ahodge@oldnorthchurch.org"]; // TBT staff, blind copied on the same emails
+// Church leaders get ONLY a daily digest (sendLeaderDigest): new public requests and public requests marked
+// answered. Never team-only requests, never reports, and never the instant emails above.
+var NOTIFY_LEADERS = ["Aeccourt7@gmail.com", "audreyshannon03@gmail.com", "HoslerBrooke02@gmail.com", "David.m.toepfer@gmail.com", "andrew.lund55@gmail.com", "Jasonrachau@gmail.com", "Drokinj@gmail.com", "Lance7058@gmail.com", "mtlessons@gmail.com", "masondebrosse@gmail.com", "mfabianl1025@gmail.com", "Meaganbarbee2020@gmail.com", "michaelschrock1@gmail.com", "michellemschrock@gmail.com", "sarahdrokin@gmail.com", "shelbie1224@gmail.com"];
 var SHEET_NAME = "Requests";
 var WALL_DAYS = 30;          // unanswered requests older than this drop off the public wall (they stay in the sheet)
 var ANSWERED_DAYS = 14;      // an answered request stays on the wall this long after it is marked answered
@@ -32,6 +35,8 @@ function setup() {
   sh.getRange(1, 1, 1, COLS.length).setValues([COLS]);
   sh.setFrozenRows(1);
   sh.setColumnWidth(4, 520);
+  var props = PropertiesService.getScriptProperties();
+  if (!props.getProperty("digestSince")) props.setProperty("digestSince", String(Date.now())); // the first digest covers what comes after setup
 }
 
 // ---------- web app entry points ----------
@@ -242,6 +247,57 @@ function wallPayload(now) {
     answered: list.filter(function (x) { return x.answered; }),
     prayers: prayers
   };
+}
+
+// ---------- daily digest for church leaders (run by a daily time trigger) ----------
+// Only public, live requests are ever included. A team-only, hidden, or removed request cannot appear here.
+function digestItems(now, since) {
+  var fresh = [], answered = [];
+  rows().forEach(function (r) {
+    if (r[C.VIS] !== "public" || r[C.STATUS] !== "live") return;
+    var t = new Date(r[C.TIME]).getTime();
+    var item = { name: String(r[C.NAME]), topic: String(r[C.TOPIC] || ""), text: String(r[C.TEXT]), update: String(r[C.UPDATE] || "") };
+    if (!isNaN(t) && t > since && t <= now) fresh.push(item);
+    var a = new Date(r[C.ANSWERED_AT]).getTime();
+    if (r[C.ANSWERED] === "yes" && !isNaN(a) && a > since && a <= now) answered.push(item);
+  });
+  return { fresh: fresh, answered: answered };
+}
+
+function digestBody(items) {
+  var out = [];
+  if (items.fresh.length) {
+    out.push("NEW PRAYER REQUESTS");
+    items.fresh.forEach(function (x) { out.push("\u2022 " + x.name + (x.topic ? " (" + x.topic + ")" : "") + ": " + x.text); });
+    out.push("");
+  }
+  if (items.answered.length) {
+    out.push("ANSWERED PRAYERS");
+    items.answered.forEach(function (x) { out.push("\u2022 " + x.name + ": " + x.text + (x.update ? "\n   Update: " + x.update : "")); });
+    out.push("");
+  }
+  out.push("Pray for them, and tap \"I prayed\" so they know: https://tbtysu.org/prayer");
+  out.push("You get this once a day because you're a TBT leader. Reply to this email if you'd like to stop.");
+  return out.join("\n");
+}
+
+function sendLeaderDigest() {
+  if (!NOTIFY_LEADERS.length) return;
+  var props = PropertiesService.getScriptProperties();
+  var now = Date.now();
+  var since = Number(props.getProperty("digestSince")) || (now - 86400000);
+  var items = digestItems(now, since);
+  if (!items.fresh.length && !items.answered.length) { props.setProperty("digestSince", String(now)); return; }
+  var mail = { to: NOTIFY_EMAIL || NOTIFY_LEADERS[0], bcc: NOTIFY_LEADERS.filter(function (a) { return a !== NOTIFY_EMAIL; }).join(","),
+    subject: "TBT prayer wall: " + (items.fresh.length + items.answered.length) + " update" + (items.fresh.length + items.answered.length === 1 ? "" : "s") + " from the last day", body: digestBody(items) };
+  try { MailApp.sendEmail(mail); props.setProperty("digestSince", String(now)); } catch (e) { Logger.log("digest failed: " + e); } // not advanced on failure, so nothing is lost
+}
+
+// Shows what the next digest would say without sending anything (run from the editor, then open the log).
+function previewLeaderDigest() {
+  var since = Number(PropertiesService.getScriptProperties().getProperty("digestSince")) || (Date.now() - 86400000);
+  var items = digestItems(Date.now(), since);
+  Logger.log(items.fresh.length + " new, " + items.answered.length + " answered since " + new Date(since).toISOString() + "\n\n" + digestBody(items));
 }
 
 function notify(subject, message) {

@@ -29,6 +29,13 @@ If you ever change `Code.gs`, redeploy with **Deploy → Manage deployments → 
 - Topics are Health, Family, School, Faith (change `TOPICS` at the top of `Code.gs` and the chips in `prayer.html`/`js/prayer.js`).
 - After editing `Code.gs`: paste it in, run `setup` once (it only rewrites the header row), then **Deploy → Manage deployments → pencil → New version**.
 
+## Who gets emails
+
+- **Pastor Bruce** (main recipient) and the **three TBT staff** (blind copy) get an instant email for every new request (public and team-only), report, and answered prayer.
+- **Church leaders** (`NOTIFY_LEADERS`) get only a **daily digest** at about 7am Eastern: new public requests and public requests marked answered from the last day. They never get team-only requests, reports, or the instant emails. The digest is built from public, live rows only. It is sent only when there's something new.
+- The digest runs from a daily time trigger on `sendLeaderDigest` (Apps Script → Triggers). To see what it would say without sending anything, run `previewLeaderDigest` and open the log.
+- Google caps an account at about 100 email recipients a day. The digest uses 17 a day however busy the wall is, which keeps room for the instant staff emails.
+
 ## Running it
 
 - Every new request is emailed to `NOTIFY_EMAIL` (top of `Code.gs`).

@@ -28,7 +28,10 @@ var Utilities = {
   computeDigest: function (alg, str) { var h = []; for (var i = 0; i < 32; i++) { var x = 0; for (var k = 0; k < str.length; k++) x = (x * 31 + str.charCodeAt(k) * (i + 7)) % 251; h.push(i % 2 ? x : x - 128); } return h; }
 };
 var Logger = { log: function () {} };
-var MailApp = { sendEmail: function (a, b, c) { if (typeof a === "object") mails.push({ to: a.to, bcc: a.bcc, s: a.subject, m: a.body }); else mails.push({ to: a, s: b, m: c }); } };
+var propStore = {};
+var PropertiesService = { getScriptProperties: function () { return { getProperty: function (k) { return propStore[k] || null; }, setProperty: function (k, v) { propStore[k] = String(v); } }; } };
+var failMail = false;
+var MailApp = { sendEmail: function (a, b, c) { if (failMail) throw new Error("quota"); if (typeof a === "object") mails.push({ to: a.to, bcc: a.bcc, s: a.subject, m: a.body }); else mails.push({ to: a, s: b, m: c }); } };
 var ContentService = { MimeType: { JSON: "json" }, createTextOutput: function (t) { return { text: t, setMimeType: function () { return this; } }; } };
 
 (0, eval)(readFile("tools/prayer-wall/Code.gs"));
@@ -137,5 +140,46 @@ check("all three staff are blind-copied on team-only requests", newTeam.every(bc
 check("all three staff are blind-copied on reports", reports.every(bccOk));
 check("all three staff are blind-copied on answered prayers", answeredMails.every(bccOk));
 check("staff addresses are not exposed in the To line", mails.every(function (m) { return m.to.indexOf("oelias") === -1 && m.to.indexOf(",") === -1; }));
+
+// ---- leaders: daily digest of PUBLIC items only, never instant emails, never anything private ----
+var LEADERS = ["Aeccourt7@gmail.com", "mtlessons@gmail.com", "shelbie1224@gmail.com", "andrew.lund55@gmail.com"];
+function hasLeader(str) { return LEADERS.some(function (a) { return String(str || "").toLowerCase().indexOf(a.toLowerCase()) !== -1; }); }
+check("leader list has all 16 leaders", NOTIFY_LEADERS.length === 16 && NOTIFY_LEADERS.every(function (a) { return /@/.test(a); }));
+check("NO instant email (new, team-only, report, answered) ever reaches a leader", mails.every(function (m) { return !hasLeader(m.to) && !hasLeader(m.bcc); }));
+var instantCount = mails.length;
+// fresh baseline, then add one public, one team-only, one hidden, one answered-public, one answered-team
+var now0 = Date.now(); propStore.digestSince = String(now0 - 1000); data.length = data.length; mails.length = 0;
+var dPub = post({ action: "submit", name: "Pia", text: "DIGESTPUBLIC please pray for my sister.", topic: "Family", visibility: "public", elapsed: 9000 });
+var dTeam = post({ action: "submit", name: "Tom", text: "DIGESTTEAMONLY a private struggle.", visibility: "team", elapsed: 9000 });
+var dHide = post({ action: "submit", name: "Hal", text: "DIGESTHIDDEN something that gets reported.", visibility: "public", elapsed: 9000 });
+post({ action: "report", id: dHide.id }); post({ action: "report", id: dHide.id }); post({ action: "report", id: dHide.id });
+var dAns = post({ action: "submit", name: "Ann", text: "DIGESTANSWERED please pray for my interview.", visibility: "public", elapsed: 9000 });
+post({ action: "answer", id: dAns.id, token: dAns.token, update: "DIGESTUPDATE I got the job." });
+post({ action: "answer", id: dTeam.id, token: dTeam.token, update: "DIGESTTEAMUPDATE resolved." });
+var beforeDigest = mails.length;
+propStore.digestSince = String(now0 - 1000);
+sendLeaderDigest();
+var digestMail = mails[mails.length - 1];
+check("digest was sent as one email", mails.length === beforeDigest + 1 && digestMail.s.indexOf("update") > -1);
+check("digest goes to every leader on blind copy", NOTIFY_LEADERS.every(function (a) { return digestMail.bcc.split(",").indexOf(a) !== -1; }));
+check("digest To line is Pastor Bruce only (no leader address exposed)", digestMail.to === "bchimani@oldnorthchurch.org");
+check("digest does not include the staff", STAFF.every(function (a) { return digestMail.bcc.indexOf(a) === -1; }));
+check("digest includes the new public request", digestMail.m.indexOf("DIGESTPUBLIC") > -1 && digestMail.m.indexOf("(Family)") > -1);
+check("digest includes the answered public request and its update", digestMail.m.indexOf("DIGESTANSWERED") > -1 && digestMail.m.indexOf("DIGESTUPDATE") > -1);
+check("digest NEVER includes the team-only request", digestMail.m.indexOf("DIGESTTEAMONLY") === -1);
+check("digest NEVER includes a team-only request's answered update", digestMail.m.indexOf("DIGESTTEAMUPDATE") === -1);
+check("digest does not include a request that was hidden by reports", digestMail.m.indexOf("DIGESTHIDDEN") === -1);
+check("digest points to the wall", digestMail.m.indexOf("tbtysu.org/prayer") > -1);
+var afterFirst = mails.length; sendLeaderDigest();
+check("a second digest right away sends nothing", mails.length === afterFirst);
+var instants = mails.slice(0, beforeDigest);
+check("the instant emails around the digest still go only to Bruce and staff", instants.length > 0 && instants.every(function (m) { return !hasLeader(m.to) && !hasLeader(m.bcc); }));
+check("team-only instant email still reached staff", instants.some(function (m) { return m.s.indexOf("[TEAM ONLY]") > -1 && bccOk(m); }));
+// failure keeps items for next time
+var w0 = Date.now(); while (Date.now() - w0 < 6) {} cacheStore = {}; post({ action: "submit", name: "Zoe", text: "DIGESTRETRY please pray for my finals.", visibility: "public", elapsed: 9000 });
+var w1 = Date.now(); while (Date.now() - w1 < 6) {} failMail = true; var sinceBefore = propStore.digestSince; sendLeaderDigest(); failMail = false;
+check("a failed digest does not advance the clock", propStore.digestSince === sinceBefore);
+var n2 = mails.length; sendLeaderDigest();
+check("the next digest delivers what the failed one missed", mails.length === n2 + 1 && mails[mails.length - 1].m.indexOf("DIGESTRETRY") > -1);
 check("ids survive Sheets number coercion", /^r/.test(id) && post({ action: "pray", id: id }).ok === true);
 console.log(pass + " passed, " + fail + " failed");
