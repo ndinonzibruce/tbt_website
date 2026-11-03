@@ -32,6 +32,10 @@ class H(BaseHTTPRequestHandler):
             first = "" if body.get("anon") else (str(body.get("name", "")).split() or [""])[0][:20]
             last = re.sub(r"[^A-Za-z' \-]", "", str(body.get("last", ""))).strip()[:30]
             name = (first + (" " + last if last else "")) if first else "Anonymous"
+            if body.get("visibility") == "team":
+                f2 = (str(body.get("name", "")).split() or [""])[0][:20]; l2 = re.sub(r"[^A-Za-z' \-]", "", str(body.get("last", ""))).strip()[:30]
+                if not f2 or not l2: return self._json({"ok": False, "error": "Please enter your first and last name so the team can reach you."})
+                name = f2 + " " + l2
             tok = secrets.token_hex(16)
             r = dict(id="r" + uuid.uuid4().hex[:8], name=name, text=t, ts=now(), visibility="team" if body.get("visibility") == "team" else "public", status="live", prayed=0, reports=0,
                      topic=body.get("topic") if body.get("topic") in TOPICS else "", answered=False, update="", token=h(tok))

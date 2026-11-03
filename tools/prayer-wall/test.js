@@ -53,7 +53,7 @@ check("anon uses Anonymous", post({ action: "submit", name: "Zed", anon: true, t
 check("empty name -> Anonymous", post({ action: "submit", text: "Pray for peace in my family.", elapsed: 9000 }).name === "Anonymous");
 check("weird name cleaned", /^[A-Za-z]+$/.test(post({ action: "submit", name: "J0$h<script>", text: "Pray for a job interview.", elapsed: 9000 }).name));
 
-var team = post({ action: "submit", name: "Sam", text: "Private struggle I need help with.", visibility: "team", elapsed: 9000 });
+var team = post({ action: "submit", name: "Sam", last: "Lee", text: "Private struggle I need help with.", visibility: "team", elapsed: 9000 });
 check("team request saved", team.ok && team.visibility === "team");
 check("team request NOT on wall", list().every(function (x) { return x.text.indexOf("Private struggle") === -1; }));
 check("team request emailed as TEAM ONLY", mails[mails.length - 1].s.indexOf("[TEAM ONLY]") > -1);
@@ -150,7 +150,7 @@ var instantCount = mails.length;
 // fresh baseline, then add one public, one team-only, one hidden, one answered-public, one answered-team
 var realStart = SUMMARY_STARTS_AT; SUMMARY_STARTS_AT = 0; var now0 = Date.now(); propStore.digestSince = String(now0 - 1000); data.length = data.length; mails.length = 0;
 var dPub = post({ action: "submit", name: "Pia", text: "DIGESTPUBLIC please pray for my sister.", topic: "Family", visibility: "public", elapsed: 9000 });
-var dTeam = post({ action: "submit", name: "Tom", text: "DIGESTTEAMONLY a private struggle.", visibility: "team", elapsed: 9000 });
+var dTeam = post({ action: "submit", name: "Tom", last: "Park", text: "DIGESTTEAMONLY a private struggle.", visibility: "team", elapsed: 9000 });
 var dHide = post({ action: "submit", name: "Hal", text: "DIGESTHIDDEN something that gets reported.", visibility: "public", elapsed: 9000 });
 post({ action: "report", id: dHide.id }); post({ action: "report", id: dHide.id }); post({ action: "report", id: dHide.id });
 var dAns = post({ action: "submit", name: "Ann", text: "DIGESTANSWERED please pray for my interview.", visibility: "public", elapsed: 9000 });
@@ -207,5 +207,18 @@ cacheStore = {}; check("Anonymous hides both names", post({ action: "submit", na
 cacheStore = {}; check("a last name with no first name is ignored", post({ action: "submit", last: "Young", text: "NAMETEST7 pray for peace today.", elapsed: 9000 }).name === "Anonymous");
 cacheStore = {}; check("a very long last name is cut to 30 characters", post({ action: "submit", name: "Max", last: new Array(60).join("a"), text: "NAMETEST8 pray for my roommate.", elapsed: 9000 }).name.length <= 20 + 1 + 30);
 cacheStore = {}; check("an old page that sends only a full name in the first field still shows just the first name", post({ action: "submit", name: "Rob Banks", text: "NAMETEST9 pray for my brother.", elapsed: 9000 }).name === "Rob");
+
+// ---- team-only requests require a first and last name ----
+cacheStore = {}; var tNoLast = post({ action: "submit", name: "Ivy", text: "TEAMNAME1 please help me with something private.", visibility: "team", elapsed: 9000 });
+check("team-only without a last name is refused", tNoLast.ok === false && /first and last name/.test(tNoLast.error));
+cacheStore = {}; check("team-only without a first name is refused", post({ action: "submit", last: "Stone", text: "TEAMNAME2 please help me with something private.", visibility: "team", elapsed: 9000 }).ok === false);
+cacheStore = {}; check("team-only with no names at all is refused", post({ action: "submit", text: "TEAMNAME3 please help me with something private.", visibility: "team", elapsed: 9000 }).ok === false);
+cacheStore = {}; check("Anonymous cannot be used for a team-only request", post({ action: "submit", anon: true, text: "TEAMNAME4 please help me with something private.", visibility: "team", elapsed: 9000 }).ok === false);
+cacheStore = {}; var tOk = post({ action: "submit", name: "Ivy", last: "Stone", anon: true, text: "TEAMNAME5 please help me with something private.", visibility: "team", elapsed: 9000 });
+check("team-only with first and last name is accepted", tOk.ok === true && tOk.name === "Ivy Stone");
+check("team-only ignores the Anonymous box and keeps the real name", tOk.name !== "Anonymous");
+check("the refused team-only requests were not saved", !data.some(function (r) { return String(r[3]).indexOf("TEAMNAME1") > -1 || String(r[3]).indexOf("TEAMNAME2") > -1 || String(r[3]).indexOf("TEAMNAME3") > -1 || String(r[3]).indexOf("TEAMNAME4") > -1; }));
+check("the team-only request is saved with the full name and never listed", data.some(function (r) { return r[3].indexOf("TEAMNAME5") > -1 && r[2] === "Ivy Stone" && r[4] === "team"; }) && !list().some(function (x) { return x.text.indexOf("TEAMNAME5") > -1; }));
+cacheStore = {}; check("public requests still allow no name and Anonymous", post({ action: "submit", text: "PUBNAME1 please pray for my week ahead.", elapsed: 9000 }).name === "Anonymous");
 check("ids survive Sheets number coercion", /^r/.test(id) && post({ action: "pray", id: id }).ok === true);
 console.log(pass + " passed, " + fail + " failed");

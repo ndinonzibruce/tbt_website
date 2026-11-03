@@ -593,3 +593,4 @@ p.form-note { font-size: 10.5px; color: var(--dim); line-height: 1.5; margin: 10
 
 .prayer-names { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 720px) { .prayer-names { grid-template-columns: 1fr; } }
+.prayer-check.is-off { opacity: 0.6; cursor: default; }

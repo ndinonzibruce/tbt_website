@@ -288,6 +288,25 @@
   var manage = document.getElementById("prayer-manage");
   text.addEventListener("input", function () { counter.textContent = text.value.length + " / 500"; });
 
+  // Team-only requests need a real name so the team can reach the person.
+  var firstIn = form.querySelector("#pf-name"), lastIn = form.querySelector("#pf-last");
+  var firstLab = form.querySelector("label[for=pf-name]"), lastLab = form.querySelector("label[for=pf-last]");
+  var anonBox = form.querySelector("input[name=anon]"), anonWrap = document.getElementById("pf-anon");
+  var anonText = anonWrap ? anonWrap.querySelector("span") : null;
+  var anonDefault = anonText ? anonText.textContent : "";
+  function syncVisibility() {
+    var team = form.querySelector("input[name=visibility]:checked").value === "team";
+    firstLab.textContent = "First name " + (team ? "(required)" : "(optional)");
+    lastLab.textContent = "Last name " + (team ? "(required)" : "(optional)");
+    firstIn.setAttribute("aria-required", String(team)); lastIn.setAttribute("aria-required", String(team));
+    if (anonBox) { anonBox.disabled = team; if (team) anonBox.checked = false; }
+    if (anonWrap) anonWrap.classList.toggle("is-off", team);
+    if (anonText) anonText.textContent = team ? "Anonymous isn't available for team-only requests, so the team knows who to reach." : anonDefault;
+  }
+  [].forEach.call(form.querySelectorAll("input[name=visibility]"), function (r) { r.addEventListener("change", syncVisibility); });
+  form.addEventListener("reset", function () { setTimeout(syncVisibility, 0); });
+  syncVisibility();
+
   function showManage(res) {
     if (!manage || !res.token) return;
     var link = location.origin + "/prayer#mine=" + res.id + ":" + res.token;
@@ -311,6 +330,12 @@
     msg.className = "prayer-msg"; msg.textContent = "";
     if (manage) manage.hidden = true;
     var fd = new FormData(form);
+    if (fd.get("visibility") === "team" && (!String(fd.get("name") || "").trim() || !String(fd.get("last") || "").trim())) {
+      msg.className = "prayer-msg err";
+      msg.textContent = "Please enter your first and last name so the team can reach you.";
+      (String(fd.get("name") || "").trim() ? lastIn : firstIn).focus();
+      return;
+    }
     send.disabled = true; send.textContent = "Sending…";
     api({
       action: "submit",

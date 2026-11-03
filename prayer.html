@@ -24,7 +24,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,500;6..12,600;6..12,700&display=swap" rel="stylesheet" />
 <link rel="icon" type="image/png" href="images/favicon.png?v=6" />
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png?v=6" />
-<link rel="stylesheet" href="css/styles.css?v=25" />
+<link rel="stylesheet" href="css/styles.css?v=26" />
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -79,7 +79,7 @@
           <input id="pf-last" name="last" type="text" maxlength="30" autocomplete="family-name" />
         </div>
       </div>
-      <label class="prayer-check"><input type="checkbox" name="anon" /> Post as Anonymous (your name won't be shown)</label>
+      <label class="prayer-check" id="pf-anon"><input type="checkbox" name="anon" /> <span>Post as Anonymous (your name won't be shown)</span></label>
       <div>
         <label for="pf-text">Your prayer request</label>
         <textarea id="pf-text" name="text" maxlength="500" required></textarea>
@@ -98,7 +98,7 @@
       <fieldset>
         <legend>Who can see this?</legend>
         <label class="prayer-radio"><input type="radio" name="visibility" value="public" checked /> Share it on the prayer wall</label>
-        <label class="prayer-radio"><input type="radio" name="visibility" value="team" /> Only the TBT team. It won't be shown on the site.</label>
+        <label class="prayer-radio"><input type="radio" name="visibility" value="team" /> Only the TBT team. It won't be shown on the site, and we'll need your first and last name.</label>
       </fieldset>
       <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off" /></label></div>
       <button type="submit" class="btn btn-gold btn-lg">Share request</button>

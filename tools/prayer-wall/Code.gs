@@ -111,11 +111,21 @@ function validate(body, recentTexts) {
   if (text.length > MAX_LEN) return { ok: false, error: "Please keep it under " + MAX_LEN + " characters." };
   if (hasContactInfo(text)) return { ok: false, error: "Please take out links, email addresses and phone numbers." };
   if (recentTexts.indexOf(text.toLowerCase()) !== -1) return { ok: false, error: "That request is already posted." };
+  var visibility = body.visibility === "team" ? "team" : "public";
+  var name;
+  if (visibility === "team") {
+    // The team needs to know who to reach, so team-only requests always carry a full name (Anonymous is not an option).
+    name = cleanName(body.name, false, body.last);
+    var parts = name.split(" ");
+    if (name === "Anonymous" || parts.length < 2) return { ok: false, error: "Please enter your first and last name so the team can reach you." };
+  } else {
+    name = cleanName(body.name, body.anon, body.last);
+  }
   return {
     ok: true,
     text: text,
-    name: cleanName(body.name, body.anon, body.last),
-    visibility: body.visibility === "team" ? "team" : "public",
+    name: name,
+    visibility: visibility,
     topic: cleanTopic(body.topic)
   };
 }
