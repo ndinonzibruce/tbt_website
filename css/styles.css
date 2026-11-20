@@ -585,6 +585,15 @@ p.form-note { font-size: 10.5px; color: var(--dim); line-height: 1.5; margin: 10
 .prayer-more { margin-top: 8px; }
 .prayer-update { font-size: 16px; line-height: 1.5; color: var(--gold-bright); margin: 12px 0 0; }
 .prayer-by { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+.prayer-prayedby { font-size: 13px; color: var(--gold-bright); margin: -6px 0 12px; }
+.pray-name-panel { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-inactive); display: grid; gap: 10px; }
+.pray-name-ask { margin: 0; font-size: 14px; line-height: 1.6; color: var(--body-text); }
+.pray-name-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pray-name-fields input { width: 100%; box-sizing: border-box; background: var(--ink); color: var(--cream); border: 1px solid var(--border-inactive); padding: 10px 12px; font: inherit; font-size: 15px; border-radius: 0; }
+.pray-name-fields input:focus { outline: none; border-color: var(--gold); }
+.pray-name-row { display: flex; gap: 16px; align-items: center; }
+.pray-name-note { margin: 0; font-size: 13px; color: var(--muted); }
+@media (max-width: 480px) { .pray-name-fields { grid-template-columns: 1fr; } }
 .prayer-card .prayer-actions { justify-content: space-between; }
 .prayer-focus-link { background: none; border: 0; padding: 0; margin: 0 0 24px; color: var(--gold-bright); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .prayer-focus-link:hover { color: var(--gold-hover-text); }
@@ -593,4 +602,3 @@ p.form-note { font-size: 10.5px; color: var(--dim); line-height: 1.5; margin: 10
 
 .prayer-names { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 720px) { .prayer-names { grid-template-columns: 1fr; } }
-.prayer-check.is-off { opacity: 0.6; cursor: default; }

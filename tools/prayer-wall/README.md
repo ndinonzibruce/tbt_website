@@ -41,7 +41,7 @@ If you ever change `Code.gs`, redeploy with **Deploy → Manage deployments → 
 
 - Every new request is emailed to `NOTIFY_EMAIL` (top of `Code.gs`).
 - To hide a request, change its **Status** cell to `hidden` in the sheet. Set it back to `live` to restore it.
-- Requests marked `team` in **Visibility** never appear on the site.
+- Requests marked `team` in **Visibility** never appear on the site. Everyone gives a first and last name; anonymous posts are not accepted.
 - A request reported 3 times is hidden automatically. Wall requests older than 30 days drop off (they stay in the sheet).
 - Links, email addresses, and phone numbers are rejected, and a flood of submissions is slowed down.
 

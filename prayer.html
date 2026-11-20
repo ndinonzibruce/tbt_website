@@ -71,15 +71,14 @@
     <form id="prayer-form" class="prayer-form" novalidate>
       <div class="prayer-names">
         <div>
-          <label for="pf-name">First name (optional)</label>
-          <input id="pf-name" name="name" type="text" maxlength="20" autocomplete="given-name" />
+          <label for="pf-name">First name</label>
+          <input id="pf-name" name="name" type="text" maxlength="20" autocomplete="given-name" required />
         </div>
         <div>
-          <label for="pf-last">Last name (optional)</label>
-          <input id="pf-last" name="last" type="text" maxlength="30" autocomplete="family-name" />
+          <label for="pf-last">Last name</label>
+          <input id="pf-last" name="last" type="text" maxlength="30" autocomplete="family-name" required />
         </div>
       </div>
-      <label class="prayer-check" id="pf-anon"><input type="checkbox" name="anon" /> <span>Post as Anonymous (your name won't be shown)</span></label>
       <div>
         <label for="pf-text">Your prayer request</label>
         <textarea id="pf-text" name="text" maxlength="500" required></textarea>
@@ -98,13 +97,14 @@
       <fieldset>
         <legend>Who can see this?</legend>
         <label class="prayer-radio"><input type="radio" name="visibility" value="public" checked /> Share it on the prayer wall</label>
-        <label class="prayer-radio"><input type="radio" name="visibility" value="team" /> Only the TBT team. It won't be shown on the site, and we'll need your first and last name.</label>
+        <label class="prayer-radio"><input type="radio" name="visibility" value="team" /> Only the TBT team. It won't be shown on the site.</label>
+        <p class="prayer-hint" style="margin-top:4px;">We don't post anonymous requests. If you don't want your request on the wall for everyone to see, choose "Only the TBT team." You still need to include your first and last name so we know who to pray for and reach.</p>
       </fieldset>
       <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off" /></label></div>
       <button type="submit" class="btn btn-gold btn-lg">Share request</button>
       <p id="prayer-msg" class="prayer-msg" role="status" aria-live="polite"></p>
       <div id="prayer-manage" class="prayer-manage" hidden></div>
-      <p class="prayer-hint">Your name shows on the wall just as you enter it, so check Anonymous if you'd rather not be named. Please leave out phone numbers and private details about other people. Requests on the wall are public and come off after 30 days. Requests marked team only are read by Pastor Bruce and the TBT team. After you post, you get a private link so you can mark your request answered or remove it. See our <a href="/privacy">privacy page</a>.</p>
+      <p class="prayer-hint">Your first and last name are required and show on the wall just as you enter them. Please leave out phone numbers and private details about other people. Requests on the wall are public and come off after 30 days. Requests marked team only are read by Pastor Bruce and the TBT team. After you post, you get a private link so you can mark your request answered or remove it. See our <a href="/privacy">privacy page</a>.</p>
       <p class="prayer-hint">This page isn't watched around the clock. If you or someone you know is in danger or thinking about suicide, call or text <strong>988</strong>, or call <strong>911</strong>.</p>
     </form>
   </section>
