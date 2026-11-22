@@ -28,6 +28,25 @@
     dropMine: function (id) { try { var m = this.mine(); delete m[id]; localStorage.setItem("tbtMine", JSON.stringify(m)); } catch (e) {} }
   };
 
+  // The name a person chose to show when they pray, remembered on this device only.
+  function savedName() { try { return JSON.parse(localStorage.getItem("tbtPrayerName") || "{}"); } catch (e) { return {}; } }
+  function saveName(first, last) { try { localStorage.setItem("tbtPrayerName", JSON.stringify({ first: first, last: last })); } catch (e) {} }
+  // "Prayed for by Maria S., Jon K. and 3 others" (latest three names; everyone else is counted).
+  function prayedByText(names, count) {
+    if (!names || !names.length) return "";
+    var shown = names.slice(-3), others = Math.max(0, (count || 0) - shown.length);
+    var list = shown.length > 1 ? shown.slice(0, -1).join(", ") + (others ? ", " : " and ") + shown[shown.length - 1] : shown[0];
+    return "Prayed for by " + list + (others ? " and " + others + (others === 1 ? " other" : " others") : "");
+  }
+  // First name and last name boxes, filled from the saved name. Returns { box, first, last }.
+  function nameFields() {
+    var saved = savedName(), box = el("div", "pray-name-fields");
+    var f = el("input"); f.type = "text"; f.maxLength = 20; f.placeholder = "First name"; f.autocomplete = "given-name"; f.setAttribute("aria-label", "First name"); f.value = saved.first || "";
+    var l = el("input"); l.type = "text"; l.maxLength = 30; l.placeholder = "Last name"; l.autocomplete = "family-name"; l.setAttribute("aria-label", "Last name"); l.value = saved.last || "";
+    box.appendChild(f); box.appendChild(l);
+    return { box: box, first: f, last: l };
+  }
+
   // A private link from another device looks like /prayer#mine=ID:TOKEN. Remember it, then clean the address bar.
   var hm = /^#mine=([A-Za-z0-9]+):([0-9a-f]+)$/.exec(location.hash);
   if (hm) { store.setMine(hm[1], hm[2]); try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {} }
@@ -111,6 +130,8 @@
       art.appendChild(up);
     }
 
+    var by = el("div", "prayer-prayedby");
+    function showBy() { var t = prayedByText(r.prayedBy, count); by.textContent = t; by.hidden = !t; }
     var actions = el("div", "prayer-actions");
     var pray = el("button", "pray-btn");
     pray.type = "button";
@@ -123,6 +144,7 @@
       likes.textContent = done
         ? (others > 0 ? "You and " + others + (others === 1 ? " other" : " others") + " prayed" : "You prayed")
         : (count > 0 ? count + (count === 1 ? " person prayed" : " people prayed") : "Be the first to pray");
+      showBy();
     }
     label();
     if (done) pray.disabled = true;
@@ -131,6 +153,7 @@
       pray.disabled = true; count += 1; done = true; label();
       store.add("tbtPrayed", r.id);
       api({ action: "pray", id: r.id }).then(function (res) { if (res && res.ok && res.count) { count = res.count; label(); } }).catch(function () {});
+      offerName(r, art, function (names) { r.prayedBy = names; showBy(); });
     });
     actions.appendChild(pray);
 
@@ -148,10 +171,34 @@
     }
     art.appendChild(actions);
     art.appendChild(likes);
+    art.appendChild(by);
     var time = el("div", "prayer-time", stamp(r.ts));
     art.appendChild(time);
     if (token && FULL) art.appendChild(ownerControls(r, token, art));
     return art;
+  }
+
+  // After "I prayed", offer to add a name. Optional: "No thanks" just closes it.
+  function offerName(r, art, onNames) {
+    var panel = el("div", "pray-name-panel");
+    panel.appendChild(el("p", "pray-name-ask", "Want them to know it was you? Add your name (optional). It shows on the wall as your first name and last initial."));
+    var nf = nameFields(); panel.appendChild(nf.box);
+    var row = el("div", "pray-name-row");
+    var add = el("button", "pray-btn", "Add my name"); add.type = "button";
+    var no = el("button", "owner-link", "No thanks"); no.type = "button";
+    row.appendChild(add); row.appendChild(no); panel.appendChild(row);
+    var note = el("p", "pray-name-note"); panel.appendChild(note);
+    no.addEventListener("click", function () { panel.remove(); });
+    add.addEventListener("click", function () {
+      var first = nf.first.value.trim(), last = nf.last.value.trim();
+      if (!first) { note.textContent = "Please enter your first name, or tap No thanks."; nf.first.focus(); return; }
+      add.disabled = true;
+      api({ action: "prayname", id: r.id, name: first, last: last }).then(function (res) {
+        if (res && res.ok) { saveName(first, last); onNames(res.names || []); panel.textContent = ""; panel.appendChild(el("p", "pray-name-ask", "Thank you. Your name was added.")); }
+        else { add.disabled = false; note.textContent = (res && res.error) || "That didn't go through. Please try again."; }
+      }).catch(function () { add.disabled = false; note.textContent = "That didn't go through. Please try again."; });
+    });
+    art.appendChild(panel);
   }
 
   // ---------- the poster's own controls ----------
@@ -274,10 +321,23 @@
     panel.appendChild(el("div", "prayer-focus-count", "Request " + (qi + 1) + " of " + queue.length));
     panel.appendChild(face(r.text, lookOf(r), "is-focus"));
     panel.appendChild(el("div", "prayer-focus-by", r.name + " · " + (r.topic ? r.topic + " · " : "") + ago(r.ts)));
+    var showName = el("label", "prayer-check"); var showBox = el("input"); showBox.type = "checkbox";
+    showName.appendChild(showBox); showName.appendChild(el("span", "", "Show my name (first name and last initial) so they know I prayed"));
+    var nf = nameFields(); nf.box.hidden = true;
+    showBox.addEventListener("change", function () { nf.box.hidden = !showBox.checked; if (showBox.checked && !nf.first.value) nf.first.focus(); });
+    panel.appendChild(showName); panel.appendChild(nf.box);
+    var focusNote = el("p", "pray-name-note"); panel.appendChild(focusNote);
     var row = el("div", "prayer-focus-row");
     var pray = el("button", "btn btn-gold btn-lg", "I prayed"); pray.type = "button";
     pray.addEventListener("click", function () {
-      if (store.list("tbtPrayed").indexOf(r.id) === -1) { store.add("tbtPrayed", r.id); r.prayed = (r.prayed || 0) + 1; state.prayers += 1; api({ action: "pray", id: r.id }).catch(function () {}); }
+      var first = nf.first.value.trim(), last = nf.last.value.trim(), withName = showBox.checked;
+      if (withName && !first) { focusNote.textContent = "Please enter your first name, or untick the box."; nf.first.focus(); return; }
+      if (store.list("tbtPrayed").indexOf(r.id) === -1) {
+        store.add("tbtPrayed", r.id); r.prayed = (r.prayed || 0) + 1; state.prayers += 1;
+        var msg = { action: "pray", id: r.id };
+        if (withName) { msg.name = first; msg.last = last; saveName(first, last); }
+        api(msg).catch(function () {});
+      }
       qi += 1; renderFocus();
     });
     var next = el("button", "btn btn-ghost btn-lg", "Next →"); next.type = "button";
@@ -342,30 +402,14 @@
   }
   text.addEventListener("input", function () { counter.textContent = text.value.length + " / 500"; drawPreview(); });
 
-  // Team-only requests need a real name so the team can reach the person.
+  // First and last name are always required.
   var firstIn = form.querySelector("#pf-name"), lastIn = form.querySelector("#pf-last");
-  var firstLab = form.querySelector("label[for=pf-name]"), lastLab = form.querySelector("label[for=pf-last]");
-  var anonBox = form.querySelector("input[name=anon]"), anonWrap = document.getElementById("pf-anon");
-  var anonText = anonWrap ? anonWrap.querySelector("span") : null;
-  var anonDefault = anonText ? anonText.textContent : "";
-  function syncVisibility() {
-    var team = form.querySelector("input[name=visibility]:checked").value === "team";
-    firstLab.textContent = "First name " + (team ? "(required)" : "(optional)");
-    lastLab.textContent = "Last name " + (team ? "(required)" : "(optional)");
-    firstIn.setAttribute("aria-required", String(team)); lastIn.setAttribute("aria-required", String(team));
-    if (anonBox) { anonBox.disabled = team; if (team) anonBox.checked = false; }
-    if (anonWrap) anonWrap.classList.toggle("is-off", team);
-    if (anonText) anonText.textContent = team ? "Anonymous isn't available for team-only requests, so the team knows who to reach." : anonDefault;
-  }
-  [].forEach.call(form.querySelectorAll("input[name=visibility]"), function (r) { r.addEventListener("change", syncVisibility); });
   form.addEventListener("reset", function () {
     setTimeout(function () {
-      syncVisibility();
       var radios = form.querySelectorAll("input[name=look]");
       if (radios.length) { radios[0].checked = true; drawPreview(); }
     }, 0);
   });
-  syncVisibility();
 
   function showManage(res) {
     if (!manage || !res.token) return;
@@ -390,9 +434,9 @@
     msg.className = "prayer-msg"; msg.textContent = "";
     if (manage) manage.hidden = true;
     var fd = new FormData(form);
-    if (fd.get("visibility") === "team" && (!String(fd.get("name") || "").trim() || !String(fd.get("last") || "").trim())) {
+    if (!String(fd.get("name") || "").trim() || !String(fd.get("last") || "").trim()) {
       msg.className = "prayer-msg err";
-      msg.textContent = "Please enter your first and last name so the team can reach you.";
+      msg.textContent = "Please enter your first and last name.";
       (String(fd.get("name") || "").trim() ? lastIn : firstIn).focus();
       return;
     }
@@ -401,7 +445,6 @@
       action: "submit",
       name: fd.get("name"),
       last: fd.get("last"),
-      anon: fd.get("anon") === "on",
       text: fd.get("text"),
       topic: fd.get("topic"),
       look: fd.get("look"),

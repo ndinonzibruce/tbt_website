@@ -3,7 +3,7 @@
 // to tbtysu.org/prayer. Setup steps are in tools/prayer-wall/README.md.
 //
 // To hide a request: change its Status cell to "hidden". To bring it back: "live".
-// Requests marked "team" in Visibility are never shown on the website.
+// Requests marked "team" in Visibility are never shown on the website. Everyone gives a first and last name, public or team-only.
 // A poster gets a private link (a secret token, stored here only as a hash) that lets
 // them mark their own request answered or remove it. You can do the same in the sheet:
 // set Answered to "yes" and fill in Update, or set Status to "hidden".
@@ -27,13 +27,15 @@ var HIDE_AFTER_REPORTS = 3;  // a request reported this many times is hidden aut
 var MAX_PER_HOUR = 40;       // brake against floods of submissions
 var MIN_FILL_MS = 3000;      // a human takes longer than this to fill in the form
 
-var COLS = ["ID", "Time", "Name", "Request", "Visibility", "Status", "Prayed", "Reports", "Topic", "Answered", "Update", "AnsweredAt", "TokenHash", "Look"];
-var C = { ID: 0, TIME: 1, NAME: 2, TEXT: 3, VIS: 4, STATUS: 5, PRAYED: 6, REPORTS: 7, TOPIC: 8, ANSWERED: 9, UPDATE: 10, ANSWERED_AT: 11, TOKEN: 12, LOOK: 13 };
+var COLS = ["ID", "Time", "Name", "Request", "Visibility", "Status", "Prayed", "Reports", "Topic", "Answered", "Update", "AnsweredAt", "TokenHash", "PrayedBy", "Look"];
+var C = { ID: 0, TIME: 1, NAME: 2, TEXT: 3, VIS: 4, STATUS: 5, PRAYED: 6, REPORTS: 7, TOPIC: 8, ANSWERED: 9, UPDATE: 10, ANSWERED_AT: 11, TOKEN: 12, PRAYED_BY: 13, LOOK: 14 };
+var MAX_PRAYER_NAMES = 40; // names people chose to show when they prayed, kept per request (the card shows the latest few)
 
 // ---------- run once from the editor (safe to run again after an update) ----------
 function setup() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sh = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
+  if (sh.getMaxColumns && sh.getMaxColumns() < COLS.length) sh.insertColumnsAfter(sh.getMaxColumns(), COLS.length - sh.getMaxColumns());
   sh.getRange(1, 1, 1, COLS.length).setValues([COLS]);
   sh.setFrozenRows(1);
   sh.setColumnWidth(4, 520);
@@ -64,7 +66,8 @@ function doPost(e) {
     lock.waitLock(10000);
     var result;
     if (body.action === "submit") result = submit(body, Date.now());
-    else if (body.action === "pray") result = bump(body.id, C.PRAYED + 1, false);
+    else if (body.action === "pray") result = pray(body);
+    else if (body.action === "prayname") result = prayName(body);
     else if (body.action === "report") result = bump(body.id, C.REPORTS + 1, true);
     else if (body.action === "answer") result = answer(body, Date.now());
     else if (body.action === "remove") result = removeOwn(body);
@@ -79,12 +82,11 @@ function doPost(e) {
 }
 
 // ---------- cleaning and checks ----------
-// Shows the name as the poster typed it: first name, plus a last name if they gave one. "Anonymous" hides it.
-function cleanName(raw, anon, last) {
-  if (anon) return "Anonymous";
+// Shows the name as the poster typed it: first name plus last name. Returns "" when no usable first name was given.
+function cleanName(raw, last) {
   var first = String(raw || "").trim().split(/\s+/)[0] || "";
   first = first.replace(/[^A-Za-z\u00C0-\u024F'\-]/g, "").slice(0, 20);
-  if (!first) return "Anonymous";
+  if (!first) return "";
   var family = String(last || "").replace(/[^A-Za-z\u00C0-\u024F'\- ]/g, "").replace(/\s+/g, " ").trim().slice(0, 30).trim();
   return family ? first + " " + family : first;
 }
@@ -118,15 +120,9 @@ function validate(body, recentTexts) {
   if (hasContactInfo(text)) return { ok: false, error: "Please take out links, email addresses and phone numbers." };
   if (recentTexts.indexOf(text.toLowerCase()) !== -1) return { ok: false, error: "That request is already posted." };
   var visibility = body.visibility === "team" ? "team" : "public";
-  var name;
-  if (visibility === "team") {
-    // The team needs to know who to reach, so team-only requests always carry a full name (Anonymous is not an option).
-    name = cleanName(body.name, false, body.last);
-    var parts = name.split(" ");
-    if (name === "Anonymous" || parts.length < 2) return { ok: false, error: "Please enter your first and last name so the team can reach you." };
-  } else {
-    name = cleanName(body.name, body.anon, body.last);
-  }
+  // Everyone signs with a first and last name. Anonymous posting is not an option.
+  var name = cleanName(body.name, body.last);
+  if (!name || name.split(" ").length < 2) return { ok: false, error: "Please enter your first and last name." };
   return {
     ok: true,
     text: text,
@@ -188,7 +184,7 @@ function submit(body, now) {
   var id = "r" + Utilities.getUuid().replace(/-/g, "").slice(0, 8);
   var token = newToken();
   var time = new Date(now).toISOString();
-  sheet().appendRow([id, time, v.name, v.text, v.visibility, "live", 0, 0, v.topic, "", "", "", hashToken(token), v.look]);
+  sheet().appendRow([id, time, v.name, v.text, v.visibility, "live", 0, 0, v.topic, "", "", "", hashToken(token), "", v.look]);
   cache.put(bucket, String(count + 1), 3600);
   notify((v.visibility === "team" ? "[TEAM ONLY] " : "") + "New prayer request from " + v.name,
     v.text + "\n\nVisibility: " + v.visibility + (v.topic ? "\nTopic: " + v.topic : "") + "\nTo hide it, set Status to \"hidden\" in the sheet.");
@@ -207,6 +203,46 @@ function bump(id, column, isReport) {
       (n >= HIDE_AFTER_REPORTS ? "\nIt has been hidden automatically." : ""));
   }
   return { ok: true, count: n };
+}
+
+// ---------- "I prayed", with an optional name ----------
+// A name is shown on the wall only when the person chooses to add it: first name plus last initial ("Maria S.").
+function prayerName(first, last) {
+  var f = String(first || "").trim().split(/\s+/)[0] || "";
+  f = f.replace(/[^A-Za-z\u00C0-\u024F'\-]/g, "").slice(0, 20);
+  if (!f) return "";
+  var l = String(last || "").replace(/[^A-Za-z\u00C0-\u024F]/g, "").charAt(0).toUpperCase();
+  return l ? f + " " + l + "." : f;
+}
+
+function prayedByList(row) {
+  var v = String(row[C.PRAYED_BY] || "");
+  return v ? v.split("|") : [];
+}
+
+// Adds the name unless it is empty or already listed (repeat taps do nothing). Returns the saved list.
+function addPrayerName(hit, body) {
+  var names = prayedByList(hit.row), name = prayerName(body.name, body.last);
+  if (!name) return names;
+  var dup = names.some(function (n) { return n.toLowerCase() === name.toLowerCase(); });
+  if (dup || names.length >= MAX_PRAYER_NAMES) return names;
+  names.push(name);
+  sheet().getRange(hit.index + 2, C.PRAYED_BY + 1).setValue(names.join("|"));
+  return names;
+}
+
+function pray(body) {
+  var res = bump(body.id, C.PRAYED + 1, false);
+  if (!res.ok) return res;
+  if (body.name) res.names = addPrayerName(findRow(body.id), body);
+  return res;
+}
+
+function prayName(body) {
+  var hit = findRow(body.id);
+  if (!hit || hit.row[C.VIS] !== "public") return { ok: false, error: "not found" };
+  if (!prayerName(body.name, body.last)) return { ok: false, error: "Please enter your first name." };
+  return { ok: true, names: addPrayerName(hit, body) };
 }
 
 // The poster marks their own request answered (or undoes it) with the private token.
@@ -252,7 +288,7 @@ function shape(r) {
   var answered = r[C.ANSWERED] === "yes";
   return {
     id: String(r[C.ID]), name: String(r[C.NAME]), text: String(r[C.TEXT]), ts: new Date(r[C.TIME]).toISOString(),
-    prayed: Number(r[C.PRAYED]) || 0, topic: String(r[C.TOPIC] || ""), look: cleanLook(String(r[C.LOOK] || "")),
+    prayed: Number(r[C.PRAYED]) || 0, prayedBy: prayedByList(r), topic: String(r[C.TOPIC] || ""), look: cleanLook(String(r[C.LOOK] || "")),
     answered: answered, update: answered ? String(r[C.UPDATE] || "") : ""
   };
 }

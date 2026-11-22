@@ -38,25 +38,33 @@ var ContentService = { MimeType: { JSON: "json" }, createTextOutput: function (t
 
 var pass = 0, fail = 0;
 function check(name, cond) { if (cond) { pass++; } else { fail++; console.log("FAIL: " + name); } }
-function post(o) { return JSON.parse(doPost({ postData: { contents: JSON.stringify(o) } }).text); }
+// Names are required now, so submissions get a default last name unless a test sets one (or sets noLast).
+function post(o) { if (o.action === "submit" && o.last === undefined && !o.noLast) o.last = "Tester"; return JSON.parse(doPost({ postData: { contents: JSON.stringify(o) } }).text); }
 function full() { cacheStore = {}; return JSON.parse(doGet({ parameter: { action: "list" } }).text); }
 function list() { return full().requests; }
 var ok = { action: "submit", name: "Maddie Smith", text: "Please pray for my exams this week.", visibility: "public", elapsed: 9000 };
 
 var r = post(ok);
-check("valid submit ok", r.ok && r.name === "Maddie");
-check("last name stripped", r.name === "Maddie");
+check("valid submit ok", r.ok && r.name === "Maddie Tester");
+check("a full name is required (first and last)", post({ action: "submit", name: "Maddie", noLast: true, text: "Please pray for my exams this week, again.", elapsed: 9000 }).ok === false);
 check("listed on wall", list().length === 1 && list()[0].text.indexOf("exams") > -1);
 check("email sent to Pastor", mails.length === 1 && mails[0].to === "bchimani@oldnorthchurch.org");
 
-check("anon uses Anonymous", post({ action: "submit", name: "Zed", anon: true, text: "Pray for my grandmother's surgery.", elapsed: 9000 }).name === "Anonymous");
-check("empty name -> Anonymous", post({ action: "submit", text: "Pray for peace in my family.", elapsed: 9000 }).name === "Anonymous");
-check("weird name cleaned", /^[A-Za-z]+$/.test(post({ action: "submit", name: "J0$h<script>", text: "Pray for a job interview.", elapsed: 9000 }).name));
+var anonTry = post({ action: "submit", name: "Zed", anon: true, noLast: true, text: "Pray for my grandmother's surgery.", elapsed: 9000 });
+check("anon flag with no last name is refused", anonTry.ok === false);
+var anonTry2 = post({ action: "submit", name: "Zed", last: "Young", anon: true, text: "Pray for my grandmother's surgery.", elapsed: 9000 });
+check("anon flag is ignored and the real name is kept", anonTry2.ok === true && anonTry2.name === "Zed Young");
+check("empty name is refused", post({ action: "submit", noLast: true, text: "Pray for peace in my family.", elapsed: 9000 }).ok === false);
+check("weird name cleaned", /^[A-Za-z]+ Tester$/.test(post({ action: "submit", name: "J0$h<script>", text: "Pray for a job interview.", elapsed: 9000 }).name));
 
-var team = post({ action: "submit", name: "Sam", last: "Lee", text: "Private struggle I need help with.", visibility: "team", elapsed: 9000 });
+function seedTeam(o) { o.visibility = "team"; return post(o); }
+var team = seedTeam({ action: "submit", name: "Sam", last: "Lee", text: "Private struggle I need help with.", elapsed: 9000 });
 check("team request saved", team.ok && team.visibility === "team");
 check("team request NOT on wall", list().every(function (x) { return x.text.indexOf("Private struggle") === -1; }));
 check("team request emailed as TEAM ONLY", mails[mails.length - 1].s.indexOf("[TEAM ONLY]") > -1);
+check("cannot pray for team request", post({ action: "pray", id: team.id }).ok === false);
+check("team row is saved as team", data.some(function (r) { return r[0] === team.id && r[4] === "team"; }));
+check("team request NOT on wall", list().every(function (x) { return x.text.indexOf("Private struggle") === -1; }));
 check("cannot pray for team request", post({ action: "pray", id: team.id }).ok === false);
 
 check("honeypot rejected", post({ action: "submit", text: "Pray for me please.", website: "http://x", elapsed: 9000 }).ok === false);
@@ -69,7 +77,7 @@ check("bare domain rejected", post({ action: "submit", text: "Visit buystuff.com
 check("email rejected", post({ action: "submit", text: "Pray for me, mail me at a@b.co", elapsed: 9000 }).ok === false);
 check("phone rejected", post({ action: "submit", text: "Pray for me, call 330-555-1234 anytime", elapsed: 9000 }).ok === false);
 check("duplicate rejected", post(ok).ok === false);
-check("normal numbers allowed", post({ action: "submit", text: "Pray for my 3 finals and my 2 jobs this week.", elapsed: 9000 }).ok === true);
+check("normal numbers allowed", post({ action: "submit", name: "Ned", text: "Pray for my 3 finals and my 2 jobs this week.", elapsed: 9000 }).ok === true);
 
 var id = list()[0].id;
 check("pray counts", post({ action: "pray", id: id }).count === 1 && post({ action: "pray", id: id }).count === 2);
@@ -99,7 +107,7 @@ var tp = post({ action: "submit", name: "Tess", text: "Please pray for my finals
 check("submit returns a token", tp.ok && /^[0-9a-f]{32}$/.test(tp.token));
 check("token is not stored in the clear", JSON.stringify(data).indexOf(tp.token) === -1);
 check("topic saved and listed", list().filter(function (x) { return x.id === tp.id; })[0].topic === "School");
-check("bad topic ignored", post({ action: "submit", text: "Please pray for my sister today.", topic: "<b>x</b>", elapsed: 9000 }).topic === "");
+check("bad topic ignored", post({ action: "submit", name: "Ned", text: "Please pray for my sister today.", topic: "<b>x</b>", elapsed: 9000 }).topic === "");
 check("answer with wrong token refused", post({ action: "answer", id: tp.id, token: "nope", update: "Passed" }).ok === false);
 check("answer with no token refused", post({ action: "answer", id: tp.id, update: "Passed" }).ok === false);
 check("answer with another request's token refused", post({ action: "answer", id: tp.id, token: team.token || "x", update: "Passed" }).ok === false);
@@ -150,7 +158,7 @@ var instantCount = mails.length;
 // fresh baseline, then add one public, one team-only, one hidden, one answered-public, one answered-team
 var realStart = SUMMARY_STARTS_AT; SUMMARY_STARTS_AT = 0; var now0 = Date.now(); propStore.digestSince = String(now0 - 1000); data.length = data.length; mails.length = 0;
 var dPub = post({ action: "submit", name: "Pia", text: "DIGESTPUBLIC please pray for my sister.", topic: "Family", visibility: "public", elapsed: 9000 });
-var dTeam = post({ action: "submit", name: "Tom", last: "Park", text: "DIGESTTEAMONLY a private struggle.", visibility: "team", elapsed: 9000 });
+var dTeam = seedTeam({ action: "submit", name: "Tom", last: "Park", text: "DIGESTTEAMONLY a private struggle.", elapsed: 9000 });
 var dHide = post({ action: "submit", name: "Hal", text: "DIGESTHIDDEN something that gets reported.", visibility: "public", elapsed: 9000 });
 post({ action: "report", id: dHide.id }); post({ action: "report", id: dHide.id }); post({ action: "report", id: dHide.id });
 var dAns = post({ action: "submit", name: "Ann", text: "DIGESTANSWERED please pray for my interview.", visibility: "public", elapsed: 9000 });
@@ -165,7 +173,7 @@ check("subject counts new and answered", /\(\d+ new, \d+ answered\)/.test(digest
 check("digest goes to every leader on blind copy", NOTIFY_LEADERS.every(function (a) { return digestMail.bcc.split(",").indexOf(a) !== -1; }));
 check("digest To line is Pastor Bruce only (no leader address exposed)", digestMail.to === "bchimani@oldnorthchurch.org");
 check("digest does not include the staff", STAFF.every(function (a) { return digestMail.bcc.indexOf(a) === -1; }));
-check("summary includes the new public request with its name", digestMail.m.indexOf("DIGESTPUBLIC") > -1 && digestMail.m.indexOf("Pia: DIGESTPUBLIC") > -1);
+check("summary includes the new public request with its name", digestMail.m.indexOf("DIGESTPUBLIC") > -1 && digestMail.m.indexOf("Pia Tester: DIGESTPUBLIC") > -1);
 check("summary has no topic labels", digestMail.m.indexOf("(Family)") === -1 && digestMail.m.indexOf("Family") === -1);
 check("digest includes the answered public request and its update", digestMail.m.indexOf("DIGESTANSWERED") > -1 && digestMail.m.indexOf("DIGESTUPDATE") > -1);
 check("digest NEVER includes the team-only request", digestMail.m.indexOf("DIGESTTEAMONLY") === -1);
@@ -199,35 +207,54 @@ var n1 = post({ action: "submit", name: "Tess", last: "Brooks", text: "NAMETEST1
 check("first and last name are shown together", n1.ok && n1.name === "Tess Brooks");
 cacheStore = {}; check("the wall lists the full name", list().some(function (x) { return x.id === n1.id && x.name === "Tess Brooks"; }));
 check("staff email shows the full name", mails.some(function (m) { return m.s.indexOf("Tess Brooks") > -1; }));
-cacheStore = {}; check("last name is optional", post({ action: "submit", name: "Sam", text: "NAMETEST2 pray for my finals.", elapsed: 9000 }).name === "Sam");
+cacheStore = {}; check("last name is required", post({ action: "submit", name: "Sam", noLast: true, text: "NAMETEST2 pray for my finals.", elapsed: 9000 }).ok === false);
 cacheStore = {}; check("multi-word last names work", post({ action: "submit", name: "Ana", last: "De La Cruz", text: "NAMETEST3 pray for my mom.", elapsed: 9000 }).name === "Ana De La Cruz");
 cacheStore = {}; check("apostrophes and hyphens are kept", post({ action: "submit", name: "Liam", last: "O'Neil-Smith", text: "NAMETEST4 pray for my job.", elapsed: 9000 }).name === "Liam O'Neil-Smith");
 cacheStore = {}; check("digits and markup are stripped from a last name", /^Kai [A-Za-z ]+$/.test(post({ action: "submit", name: "Kai", last: "Br00ks<b>x</b>", text: "NAMETEST5 pray for my sister.", elapsed: 9000 }).name));
-cacheStore = {}; check("Anonymous hides both names", post({ action: "submit", name: "Zed", last: "Young", anon: true, text: "NAMETEST6 pray for my parents.", elapsed: 9000 }).name === "Anonymous");
-cacheStore = {}; check("a last name with no first name is ignored", post({ action: "submit", last: "Young", text: "NAMETEST7 pray for peace today.", elapsed: 9000 }).name === "Anonymous");
+cacheStore = {}; check("the Anonymous box no longer hides names", post({ action: "submit", name: "Zed", last: "Young", anon: true, text: "NAMETEST6 pray for my parents.", elapsed: 9000 }).name === "Zed Young");
+cacheStore = {}; check("a last name with no first name is refused", post({ action: "submit", last: "Young", text: "NAMETEST7 pray for peace today.", elapsed: 9000 }).ok === false);
 cacheStore = {}; check("a very long last name is cut to 30 characters", post({ action: "submit", name: "Max", last: new Array(60).join("a"), text: "NAMETEST8 pray for my roommate.", elapsed: 9000 }).name.length <= 20 + 1 + 30);
-cacheStore = {}; check("an old page that sends only a full name in the first field still shows just the first name", post({ action: "submit", name: "Rob Banks", text: "NAMETEST9 pray for my brother.", elapsed: 9000 }).name === "Rob");
+cacheStore = {}; check("a full name typed only in the first field is refused", post({ action: "submit", name: "Rob Banks", noLast: true, text: "NAMETEST9 pray for my brother.", elapsed: 9000 }).ok === false);
 
-// ---- team-only requests require a first and last name ----
-cacheStore = {}; var tNoLast = post({ action: "submit", name: "Ivy", text: "TEAMNAME1 please help me with something private.", visibility: "team", elapsed: 9000 });
+// ---- team-only requests still need a first and last name (no anonymous option anywhere) ----
+cacheStore = {}; var tNoLast = post({ action: "submit", name: "Ivy", noLast: true, text: "TEAMNAME1 please help me with something private.", visibility: "team", elapsed: 9000 });
 check("team-only without a last name is refused", tNoLast.ok === false && /first and last name/.test(tNoLast.error));
 cacheStore = {}; check("team-only without a first name is refused", post({ action: "submit", last: "Stone", text: "TEAMNAME2 please help me with something private.", visibility: "team", elapsed: 9000 }).ok === false);
-cacheStore = {}; check("team-only with no names at all is refused", post({ action: "submit", text: "TEAMNAME3 please help me with something private.", visibility: "team", elapsed: 9000 }).ok === false);
-cacheStore = {}; check("Anonymous cannot be used for a team-only request", post({ action: "submit", anon: true, text: "TEAMNAME4 please help me with something private.", visibility: "team", elapsed: 9000 }).ok === false);
+cacheStore = {}; check("team-only with no names at all is refused", post({ action: "submit", noLast: true, text: "TEAMNAME3 please help me with something private.", visibility: "team", elapsed: 9000 }).ok === false);
+cacheStore = {}; check("the anon flag cannot make a team-only request anonymous", post({ action: "submit", anon: true, noLast: true, text: "TEAMNAME4 please help me with something private.", visibility: "team", elapsed: 9000 }).ok === false);
 cacheStore = {}; var tOk = post({ action: "submit", name: "Ivy", last: "Stone", anon: true, text: "TEAMNAME5 please help me with something private.", visibility: "team", elapsed: 9000 });
-check("team-only with first and last name is accepted", tOk.ok === true && tOk.name === "Ivy Stone");
-check("team-only ignores the Anonymous box and keeps the real name", tOk.name !== "Anonymous");
-check("the refused team-only requests were not saved", !data.some(function (r) { return String(r[3]).indexOf("TEAMNAME1") > -1 || String(r[3]).indexOf("TEAMNAME2") > -1 || String(r[3]).indexOf("TEAMNAME3") > -1 || String(r[3]).indexOf("TEAMNAME4") > -1; }));
+check("team-only with first and last name is accepted under the real name", tOk.ok === true && tOk.name === "Ivy Stone" && tOk.visibility === "team");
+check("the refused team-only requests were not saved", !data.some(function (r) { return /TEAMNAME[1-4]/.test(String(r[3])); }));
 check("the team-only request is saved with the full name and never listed", data.some(function (r) { return r[3].indexOf("TEAMNAME5") > -1 && r[2] === "Ivy Stone" && r[4] === "team"; }) && !list().some(function (x) { return x.text.indexOf("TEAMNAME5") > -1; }));
-cacheStore = {}; check("public requests still allow no name and Anonymous", post({ action: "submit", text: "PUBNAME1 please pray for my week ahead.", elapsed: 9000 }).name === "Anonymous");
-// card looks
-cacheStore = {}; var lk = post({ action: "submit", name: "Lia", text: "LOOK1 please pray for my week ahead.", look: "ocean", elapsed: 9000 });
-check("a valid look is saved and returned", lk.ok === true && lk.look === "ocean" && data.some(function (r) { return r[3].indexOf("LOOK1") > -1 && r[13] === "ocean"; }));
+cacheStore = {}; check("public requests need a name too", post({ action: "submit", noLast: true, text: "PUBNAME1 please pray for my week ahead.", elapsed: 9000 }).ok === false);
+
+// ---- optional name when praying ----
+cacheStore = {}; var pn = post({ action: "submit", name: "Rae", last: "Cole", text: "PRAYNAME1 please pray for my family.", elapsed: 9000 });
+var pr0 = post({ action: "pray", id: pn.id });
+check("praying without a name still just counts", pr0.ok && pr0.count === 1 && (!pr0.names || pr0.names.length === 0));
+cacheStore = {}; check("no name is shown when none was added", list().filter(function (x) { return x.id === pn.id; })[0].prayedBy.length === 0);
+var pr1 = post({ action: "prayname", id: pn.id, name: "Maria", last: "Santos" });
+check("a name is saved as first name and last initial", pr1.ok && pr1.names.join() === "Maria S.");
+check("adding a name does not change the count", (cacheStore = {}, list().filter(function (x) { return x.id === pn.id; })[0].prayed === 1));
+var pr2 = post({ action: "pray", id: pn.id, name: "Jon", last: "" });
+check("pray with a name counts and saves the name (first name only is fine)", pr2.ok && pr2.count === 2 && pr2.names.join() === "Maria S.,Jon");
+check("the same name twice is listed once", post({ action: "prayname", id: pn.id, name: "maria", last: "sanchez" }).names.length === 2);
+check("the wall lists the names", (cacheStore = {}, list().filter(function (x) { return x.id === pn.id; })[0].prayedBy.join() === "Maria S.,Jon"));
+check("markup and digits are stripped from a name", post({ action: "prayname", id: pn.id, name: "K1m<b>", last: "9Lee" }).names.slice(-1)[0] === "Kmb L.");
+check("an empty name is refused", post({ action: "prayname", id: pn.id, name: "", last: "X" }).ok === false);
+check("a name cannot be added to a team-only row", post({ action: "prayname", id: team.id, name: "Bo", last: "Z" }).ok === false);
+check("names cap at " + MAX_PRAYER_NAMES, (function () { var last; for (var i = 0; i < MAX_PRAYER_NAMES + 5; i++) last = post({ action: "prayname", id: pn.id, name: "N" + String.fromCharCode(97 + i % 26) + String.fromCharCode(97 + (i / 26 | 0)), last: "Q" }); return last.names.length === MAX_PRAYER_NAMES; })());
+check("digest and wall counts unaffected by names", (cacheStore = {}, full().prayers >= 2));
+
+// ---- card looks ----
+cacheStore = {}; var lk = post({ action: "submit", name: "Lia", last: "Ray", text: "LOOK1 please pray for my week ahead.", look: "ocean", elapsed: 9000 });
+check("a valid look is saved and returned", lk.ok === true && lk.look === "ocean" && data.some(function (r) { return r[3].indexOf("LOOK1") > -1 && r[14] === "ocean"; }));
 check("the look is on the wall", full().requests.some(function (x) { return x.text.indexOf("LOOK1") > -1 && x.look === "ocean"; }));
-cacheStore = {}; var lk2 = post({ action: "submit", name: "Lia", text: "LOOK2 please pray for my week ahead.", look: "<script>", elapsed: 9000 });
-check("an unknown look is dropped, not rejected", lk2.ok === true && lk2.look === "" && data.some(function (r) { return r[3].indexOf("LOOK2") > -1 && r[13] === ""; }));
-cacheStore = {}; check("no look is fine", post({ action: "submit", name: "Lia", text: "LOOK3 please pray for my week ahead.", elapsed: 9000 }).look === "");
-check("older rows with no look column still list", (function () { data[0].length = 13; return full().requests.every(function (x) { return typeof x.look === "string"; }); })());
-cacheStore = {}; check("every allowed look is accepted", LOOKS.every(function (k, i) { cacheStore = {}; return post({ action: "submit", name: "Lia", text: "LOOKALL" + i + " please pray for my week ahead.", look: k, elapsed: 9000 }).look === k; }));
+cacheStore = {}; var lk2 = post({ action: "submit", name: "Lia", last: "Ray", text: "LOOK2 please pray for my week ahead.", look: "<script>", elapsed: 9000 });
+check("an unknown look is dropped, not rejected", lk2.ok === true && lk2.look === "" && data.some(function (r) { return r[3].indexOf("LOOK2") > -1 && r[14] === ""; }));
+cacheStore = {}; check("no look is fine", post({ action: "submit", name: "Lia", last: "Ray", text: "LOOK3 please pray for my week ahead.", elapsed: 9000 }).look === "");
+check("older rows with no look column still list", (function () { var keep = data[0].length; data[0].length = 13; var ok = full().requests.every(function (x) { return typeof x.look === "string"; }); return ok; })());
+cacheStore = {}; check("every allowed look is accepted", LOOKS.every(function (k, i) { cacheStore = {}; return post({ action: "submit", name: "Lia", last: "Ray", text: "LOOKALL" + i + " please pray for my week ahead.", look: k, elapsed: 9000 }).look === k; }));
+check("the look does not disturb the names people add when praying", (cacheStore = {}, list().filter(function (x) { return x.id === pn.id; })[0].prayedBy.length > 0));
 check("ids survive Sheets number coercion", /^r/.test(id) && post({ action: "pray", id: id }).ok === true);
 console.log(pass + " passed, " + fail + " failed");

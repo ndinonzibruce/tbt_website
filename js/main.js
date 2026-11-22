@@ -28,6 +28,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // A floating link to the prayer wall on every page except the wall itself.
+  if (!/^\/prayer(\.html)?\/?$/.test(location.pathname)) {
+    const fab = document.createElement("a");
+    fab.className = "prayer-fab";
+    fab.href = "/prayer";
+    fab.innerHTML = '<span aria-hidden="true">\u{1F64F}</span> Prayer wall';
+    document.body.appendChild(fab);
+  }
+
   const backToTop = document.createElement("button");
   backToTop.className = "back-to-top";
   backToTop.setAttribute("aria-label", "Back to top");

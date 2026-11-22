@@ -11,7 +11,7 @@ def now(): return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 def h(t): return hashlib.sha256(t.encode()).hexdigest()
 def cors(x):
     x.send_header("Access-Control-Allow-Origin", "*"); x.send_header("Access-Control-Allow-Headers", "*")
-def shape(r): return {k: r[k] for k in ("id", "name", "text", "ts", "prayed", "topic", "look", "answered", "update")}
+def shape(r): return {k: r[k] for k in ("id", "name", "text", "ts", "prayed", "topic", "look", "answered", "update")} | {"prayedBy": r.get("prayedBy", [])}
 
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a): pass
@@ -30,13 +30,10 @@ class H(BaseHTTPRequestHandler):
             if body.get("website") or body.get("elapsed", 0) < 3000: return self._json({"ok": False, "error": "spam"})
             if len(t) < 5: return self._json({"ok": False, "error": "Please write a little more."})
             if re.search(r"https?:|@|\d{10}", t): return self._json({"ok": False, "error": "Please take out links, email addresses and phone numbers."})
-            first = "" if body.get("anon") else (str(body.get("name", "")).split() or [""])[0][:20]
-            last = re.sub(r"[^A-Za-z' \-]", "", str(body.get("last", ""))).strip()[:30]
-            name = (first + (" " + last if last else "")) if first else "Anonymous"
-            if body.get("visibility") == "team":
-                f2 = (str(body.get("name", "")).split() or [""])[0][:20]; l2 = re.sub(r"[^A-Za-z' \-]", "", str(body.get("last", ""))).strip()[:30]
-                if not f2 or not l2: return self._json({"ok": False, "error": "Please enter your first and last name so the team can reach you."})
-                name = f2 + " " + l2
+            f2 = re.sub(r"[^A-Za-z' \-]", "", (str(body.get("name", "")).split() or [""])[0])[:20]
+            l2 = re.sub(r"[^A-Za-z' \-]", "", str(body.get("last", ""))).strip()[:30]
+            if not f2 or not l2: return self._json({"ok": False, "error": "Please enter your first and last name."})
+            name = f2 + " " + l2
             tok = secrets.token_hex(16)
             r = dict(id="r" + uuid.uuid4().hex[:8], name=name, text=t, ts=now(), visibility="team" if body.get("visibility") == "team" else "public", status="live", prayed=0, reports=0,
                      topic=body.get("topic") if body.get("topic") in TOPICS else "", look=body.get("look") if body.get("look") in LOOKS else "", answered=False, update="", token=h(tok))
@@ -51,7 +48,19 @@ class H(BaseHTTPRequestHandler):
                 if len(u) > 200: return self._json({"ok": False, "error": "Please keep the update under 200 characters."})
                 r["answered"] = True; r["update"] = u; return self._json({"ok": True, "answered": True, "update": u})
             if r["visibility"] != "public": break
-            if a == "pray": r["prayed"] += 1; return self._json({"ok": True, "count": r["prayed"]})
+            def add_name():
+                f = re.sub(r"[^A-Za-z'\-]", "", (str(body.get("name", "")).split() or [""])[0])[:20]
+                l = re.sub(r"[^A-Za-z]", "", str(body.get("last", "")))[:1].upper()
+                n = f + (" " + l + "." if l else "") if f else ""
+                names = r.setdefault("prayedBy", [])
+                if n and n.lower() not in [x.lower() for x in names]: names.append(n)
+                return names
+            if a == "pray":
+                r["prayed"] += 1
+                res = {"ok": True, "count": r["prayed"]}
+                if body.get("name"): res["names"] = add_name()
+                return self._json(res)
+            if a == "prayname": return self._json({"ok": True, "names": add_name()})
             if a == "report":
                 r["reports"] += 1
                 if r["reports"] >= 3: r["status"] = "hidden"
