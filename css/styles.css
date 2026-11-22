@@ -521,7 +521,7 @@ p.form-note { font-size: 10.5px; color: var(--dim); line-height: 1.5; margin: 10
 .pray-btn { background: transparent; border: 1px solid var(--gold); color: var(--gold-bright); font: inherit; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; padding: 9px 16px; cursor: pointer; }
 .pray-btn:hover:not(:disabled) { background: rgba(176,141,79,0.15); }
 .pray-btn:disabled { border-color: var(--border-inactive); color: var(--muted); cursor: default; }
-.report-btn { background: none; border: 0; padding: 0; color: var(--faint); font: inherit; font-size: 12px; text-decoration: underline; cursor: pointer; }
+.report-btn { background: none; border: 0; padding: 0; color: var(--dim); font: inherit; font-size: 12px; text-decoration: underline; cursor: pointer; }
 .report-btn:hover { color: var(--muted); }
 .prayer-empty { color: var(--muted); font-size: 17px; text-align: center; padding: 40px 0; margin: 0; }
 [hidden] { display: none !important; }
@@ -603,7 +603,7 @@ p.form-note { font-size: 10.5px; color: var(--dim); line-height: 1.5; margin: 10
 .prayer-card .prayer-actions { padding: 12px 16px 0; justify-content: space-between; }
 .pray-btn { border-radius: 20px; }
 .prayer-likes { padding: 8px 16px 0; font-size: 13.5px; font-weight: 700; color: var(--cream); }
-.prayer-time { padding: 3px 16px 14px; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint); }
+.prayer-time { padding: 3px 16px 14px; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--dim); }
 .prayer-card .prayer-owner { margin: 0 16px 14px; }
 .prayer-focus-link { background: none; border: 0; padding: 0; margin: 0 0 24px; color: var(--gold-bright); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .prayer-focus-link:hover { color: var(--gold-hover-text); }
