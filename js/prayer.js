@@ -57,34 +57,80 @@
     return d + (d === 1 ? " day ago" : " days ago");
   }
 
+  // ---------- card looks: a color and a font the poster picks ----------
+  var LOOKS = ["cream", "night", "ocean", "gold", "wine", "sage", "peach", "ink"];
+  var LOOK_NAMES = { cream: "Cream", night: "Night", ocean: "Ocean", gold: "Gold", wine: "Wine", sage: "Sage", peach: "Peach", ink: "Ink" };
+  function hash(str) { var h = 0; for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0; return h; }
+  // Older requests have no look saved, so they get a steady one worked out from their ID.
+  function lookOf(r) { return LOOKS.indexOf(r.look) !== -1 ? r.look : LOOKS[hash(String(r.id)) % LOOKS.length]; }
+  function sizeOf(t) { var n = String(t).length; return n <= 70 ? "xl" : n <= 160 ? "l" : n <= 300 ? "m" : "s"; }
+  function initials(name) { if (!name || name === "Anonymous") return "?"; var p = name.split(" "); return (p[0].charAt(0) + (p[1] ? p[1].charAt(0) : "")).toUpperCase(); }
+  function stamp(iso) { return new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }); }
+
+  // The extra fonts load only once there is a card to show, so pages without one never pay for them.
+  var fontsAdded = false;
+  function loadFonts() {
+    if (fontsAdded) return; fontsAdded = true;
+    var l = document.createElement("link"); l.rel = "stylesheet";
+    l.href = "https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Oswald:wght@500;600&family=Playfair+Display:ital,wght@0,700;1,600&display=swap";
+    document.head.appendChild(l);
+  }
+
+  // The colored square with the request on it.
+  function face(text, look, extra) {
+    loadFonts();
+    var f = el("div", "prayer-face look-" + look + " size-" + sizeOf(text) + (extra ? " " + extra : ""));
+    f.appendChild(el("p", "prayer-text", text));
+    return f;
+  }
+
   // ---------- one request card ----------
   function card(r) {
     var art = el("article", "prayer-card" + (r.answered ? " is-answered" : ""));
     art.setAttribute("data-id", r.id);
 
-    var body = el("div", "prayer-body");
-    if (r.answered) body.appendChild(el("span", "prayer-badge", "Answered"));
-    else if (r.topic) body.appendChild(el("div", "prayer-topic", r.topic));
-    body.appendChild(el("p", "prayer-text", r.text));
-    if (r.answered && r.update) body.appendChild(el("p", "prayer-update", r.update));
-    art.appendChild(body);
+    var head = el("div", "prayer-head");
+    var av = el("div", "prayer-avatar" + (r.name === "Anonymous" ? " is-anon" : ""));
+    av.appendChild(el("span", null, initials(r.name)));
+    head.appendChild(av);
+    var who = el("div", "prayer-who");
+    who.appendChild(el("b", "prayer-name", r.name));
+    var sub = el("small", "prayer-sub", (r.topic ? r.topic + " \u00b7 " : "") + ago(r.ts));
+    sub.title = stamp(r.ts);
+    who.appendChild(sub);
+    head.appendChild(who);
+    art.appendChild(head);
 
-    var foot = el("div", "prayer-foot");
-    foot.appendChild(el("div", "prayer-by", r.name + " \u00b7 " + ago(r.ts)));
+    var pic = face(r.text, lookOf(r));
+    if (r.answered) pic.appendChild(el("span", "prayer-badge", "Answered"));
+    art.appendChild(pic);
+    if (r.answered && r.update) {
+      var up = el("p", "prayer-update");
+      up.appendChild(el("b", null, "Answered: "));
+      up.appendChild(document.createTextNode(r.update));
+      art.appendChild(up);
+    }
+
     var actions = el("div", "prayer-actions");
-
     var pray = el("button", "pray-btn");
     pray.type = "button";
+    var likes = el("div", "prayer-likes");
     var count = r.prayed || 0;
-    function label(done) { pray.textContent = (done ? "You prayed" : "I prayed") + (count ? " \u00b7 " + count : ""); }
     var done = store.list("tbtPrayed").indexOf(r.id) !== -1;
-    label(done);
+    function label() {
+      pray.textContent = "\ud83d\ude4f " + (done ? "You prayed" : "I prayed");
+      var others = done ? count - 1 : count;
+      likes.textContent = done
+        ? (others > 0 ? "You and " + others + (others === 1 ? " other" : " others") + " prayed" : "You prayed")
+        : (count > 0 ? count + (count === 1 ? " person prayed" : " people prayed") : "Be the first to pray");
+    }
+    label();
     if (done) pray.disabled = true;
     pray.addEventListener("click", function () {
       if (pray.disabled) return;
-      pray.disabled = true; count += 1; label(true);
+      pray.disabled = true; count += 1; done = true; label();
       store.add("tbtPrayed", r.id);
-      api({ action: "pray", id: r.id }).then(function (res) { if (res && res.ok && res.count) { count = res.count; label(true); } }).catch(function () {});
+      api({ action: "pray", id: r.id }).then(function (res) { if (res && res.ok && res.count) { count = res.count; label(); } }).catch(function () {});
     });
     actions.appendChild(pray);
 
@@ -100,22 +146,12 @@
       });
       actions.appendChild(report);
     }
-    foot.appendChild(actions);
-    art.appendChild(foot);
+    art.appendChild(actions);
+    art.appendChild(likes);
+    var time = el("div", "prayer-time", stamp(r.ts));
+    art.appendChild(time);
     if (token && FULL) art.appendChild(ownerControls(r, token, art));
     return art;
-  }
-
-  // Long requests are cut to a few lines with a Read more link (measured once the card is on the page).
-  function addReadMore(art) {
-    var t = art.querySelector(".prayer-text");
-    if (!t || t.scrollHeight <= t.clientHeight + 2) return;
-    var more = el("button", "owner-link prayer-more", "Read more"); more.type = "button";
-    more.addEventListener("click", function () {
-      var open = t.classList.toggle("is-open");
-      more.textContent = open ? "Show less" : "Read more";
-    });
-    t.parentNode.insertBefore(more, t.nextSibling);
   }
 
   // ---------- the poster's own controls ----------
@@ -211,7 +247,6 @@
     wall.textContent = "";
     if (!list.length) { wall.appendChild(el("p", "prayer-empty", "No requests yet. Be the first to share one.")); return; }
     list.forEach(function (r) { wall.appendChild(card(r)); });
-    [].forEach.call(wall.querySelectorAll(".prayer-card"), addReadMore);
   }
 
   // ---------- "Pray through them" ----------
@@ -237,11 +272,8 @@
     var bar = el("div", "prayer-focus-bar"); var fill = el("i"); fill.style.width = Math.round((qi / queue.length) * 100) + "%"; bar.appendChild(fill);
     panel.appendChild(bar);
     panel.appendChild(el("div", "prayer-focus-count", "Request " + (qi + 1) + " of " + queue.length));
-    var big = el("div", "prayer-focus-card");
-    if (r.topic) big.appendChild(el("div", "prayer-topic", r.topic));
-    big.appendChild(el("p", "prayer-focus-text", r.text));
-    big.appendChild(el("div", "prayer-focus-by", r.name + " · " + ago(r.ts)));
-    panel.appendChild(big);
+    panel.appendChild(face(r.text, lookOf(r), "is-focus"));
+    panel.appendChild(el("div", "prayer-focus-by", r.name + " · " + (r.topic ? r.topic + " · " : "") + ago(r.ts)));
     var row = el("div", "prayer-focus-row");
     var pray = el("button", "btn btn-gold btn-lg", "I prayed"); pray.type = "button";
     pray.addEventListener("click", function () {
@@ -286,7 +318,29 @@
   var msg = document.getElementById("prayer-msg");
   var send = form.querySelector("button[type=submit]");
   var manage = document.getElementById("prayer-manage");
-  text.addEventListener("input", function () { counter.textContent = text.value.length + " / 500"; });
+  // Picking a look: a row of swatches and a live preview of the card.
+  var looksBox = document.getElementById("pf-looks"), preview = document.getElementById("pf-preview");
+  function currentLook() { var c = form.querySelector("input[name=look]:checked"); return c ? c.value : LOOKS[0]; }
+  function drawPreview() {
+    if (!preview) return;
+    var t = text.value.trim() || "Your request will look like this.";
+    preview.textContent = "";
+    preview.appendChild(face(t, currentLook()));
+  }
+  if (looksBox) {
+    var pick = Math.floor(Math.random() * LOOKS.length); // a random start, so the wall stays varied even if nobody changes it
+    LOOKS.forEach(function (k, i) {
+      var lab = el("label", "look-opt");
+      var inp = el("input"); inp.type = "radio"; inp.name = "look"; inp.value = k; inp.checked = i === pick;
+      inp.setAttribute("aria-label", LOOK_NAMES[k]);
+      inp.addEventListener("change", drawPreview);
+      var sw = el("span", "look-swatch look-" + k); sw.appendChild(el("i", null, "Aa")); sw.title = LOOK_NAMES[k];
+      lab.appendChild(inp); lab.appendChild(sw); looksBox.appendChild(lab);
+    });
+    loadFonts();
+    drawPreview();
+  }
+  text.addEventListener("input", function () { counter.textContent = text.value.length + " / 500"; drawPreview(); });
 
   // Team-only requests need a real name so the team can reach the person.
   var firstIn = form.querySelector("#pf-name"), lastIn = form.querySelector("#pf-last");
@@ -304,7 +358,13 @@
     if (anonText) anonText.textContent = team ? "Anonymous isn't available for team-only requests, so the team knows who to reach." : anonDefault;
   }
   [].forEach.call(form.querySelectorAll("input[name=visibility]"), function (r) { r.addEventListener("change", syncVisibility); });
-  form.addEventListener("reset", function () { setTimeout(syncVisibility, 0); });
+  form.addEventListener("reset", function () {
+    setTimeout(function () {
+      syncVisibility();
+      var radios = form.querySelectorAll("input[name=look]");
+      if (radios.length) { radios[Math.floor(Math.random() * radios.length)].checked = true; drawPreview(); }
+    }, 0);
+  });
   syncVisibility();
 
   function showManage(res) {
@@ -344,6 +404,7 @@
       anon: fd.get("anon") === "on",
       text: fd.get("text"),
       topic: fd.get("topic"),
+      look: fd.get("look"),
       visibility: fd.get("visibility"),
       website: fd.get("website"),
       elapsed: Date.now() - loadedAt
@@ -356,7 +417,7 @@
         form.reset(); counter.textContent = "0 / 500";
         showManage(res);
         if (!team && wall) {
-          state.requests.unshift({ id: res.id, name: res.name, text: res.text, ts: res.ts, prayed: 0, topic: res.topic || "", answered: false, update: "" });
+          state.requests.unshift({ id: res.id, name: res.name, text: res.text, ts: res.ts, prayed: 0, topic: res.topic || "", look: res.look || "", answered: false, update: "" });
           render();
         }
       } else {

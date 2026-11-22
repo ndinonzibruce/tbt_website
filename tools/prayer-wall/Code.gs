@@ -22,12 +22,13 @@ var MIN_LEN = 5;
 var MAX_LEN = 500;
 var MAX_UPDATE_LEN = 200;
 var TOPICS = ["Health", "Family", "School", "Faith"];
+var LOOKS = ["cream", "night", "ocean", "gold", "wine", "sage", "peach", "ink"]; // the card colors and fonts a poster can pick (the page, js/prayer.js, draws them)
 var HIDE_AFTER_REPORTS = 3;  // a request reported this many times is hidden automatically
 var MAX_PER_HOUR = 40;       // brake against floods of submissions
 var MIN_FILL_MS = 3000;      // a human takes longer than this to fill in the form
 
-var COLS = ["ID", "Time", "Name", "Request", "Visibility", "Status", "Prayed", "Reports", "Topic", "Answered", "Update", "AnsweredAt", "TokenHash"];
-var C = { ID: 0, TIME: 1, NAME: 2, TEXT: 3, VIS: 4, STATUS: 5, PRAYED: 6, REPORTS: 7, TOPIC: 8, ANSWERED: 9, UPDATE: 10, ANSWERED_AT: 11, TOKEN: 12 };
+var COLS = ["ID", "Time", "Name", "Request", "Visibility", "Status", "Prayed", "Reports", "Topic", "Answered", "Update", "AnsweredAt", "TokenHash", "Look"];
+var C = { ID: 0, TIME: 1, NAME: 2, TEXT: 3, VIS: 4, STATUS: 5, PRAYED: 6, REPORTS: 7, TOPIC: 8, ANSWERED: 9, UPDATE: 10, ANSWERED_AT: 11, TOKEN: 12, LOOK: 13 };
 
 // ---------- run once from the editor (safe to run again after an update) ----------
 function setup() {
@@ -96,6 +97,11 @@ function cleanTopic(raw) {
   return TOPICS.indexOf(raw) !== -1 ? raw : "";
 }
 
+// A card look the poster picked. Anything else is left blank, and the page picks one from the post's ID.
+function cleanLook(raw) {
+  return LOOKS.indexOf(raw) !== -1 ? raw : "";
+}
+
 // Links, emails and phone numbers have no place on a public wall (privacy and spam).
 function hasContactInfo(text) {
   return /https?:|www\.|[A-Za-z0-9-]+\.(com|net|org|edu|io|co|us|me|ly)\b/i.test(text) ||
@@ -126,7 +132,8 @@ function validate(body, recentTexts) {
     text: text,
     name: name,
     visibility: visibility,
-    topic: cleanTopic(body.topic)
+    topic: cleanTopic(body.topic),
+    look: cleanLook(body.look)
   };
 }
 
@@ -181,11 +188,11 @@ function submit(body, now) {
   var id = "r" + Utilities.getUuid().replace(/-/g, "").slice(0, 8);
   var token = newToken();
   var time = new Date(now).toISOString();
-  sheet().appendRow([id, time, v.name, v.text, v.visibility, "live", 0, 0, v.topic, "", "", "", hashToken(token)]);
+  sheet().appendRow([id, time, v.name, v.text, v.visibility, "live", 0, 0, v.topic, "", "", "", hashToken(token), v.look]);
   cache.put(bucket, String(count + 1), 3600);
   notify((v.visibility === "team" ? "[TEAM ONLY] " : "") + "New prayer request from " + v.name,
     v.text + "\n\nVisibility: " + v.visibility + (v.topic ? "\nTopic: " + v.topic : "") + "\nTo hide it, set Status to \"hidden\" in the sheet.");
-  return { ok: true, id: id, token: token, name: v.name, text: v.text, ts: time, prayed: 0, visibility: v.visibility, topic: v.topic, answered: false, update: "" };
+  return { ok: true, id: id, token: token, name: v.name, text: v.text, ts: time, prayed: 0, visibility: v.visibility, topic: v.topic, look: v.look, answered: false, update: "" };
 }
 
 // column is 1-based. For reports, the request is hidden once enough people flag it.
@@ -245,7 +252,7 @@ function shape(r) {
   var answered = r[C.ANSWERED] === "yes";
   return {
     id: String(r[C.ID]), name: String(r[C.NAME]), text: String(r[C.TEXT]), ts: new Date(r[C.TIME]).toISOString(),
-    prayed: Number(r[C.PRAYED]) || 0, topic: String(r[C.TOPIC] || ""),
+    prayed: Number(r[C.PRAYED]) || 0, topic: String(r[C.TOPIC] || ""), look: cleanLook(String(r[C.LOOK] || "")),
     answered: answered, update: answered ? String(r[C.UPDATE] || "") : ""
   };
 }

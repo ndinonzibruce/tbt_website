@@ -6,11 +6,12 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 DB = []
 TOPICS = ["Health", "Family", "School", "Faith"]
+LOOKS = ["cream", "night", "ocean", "gold", "wine", "sage", "peach", "ink"]
 def now(): return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 def h(t): return hashlib.sha256(t.encode()).hexdigest()
 def cors(x):
     x.send_header("Access-Control-Allow-Origin", "*"); x.send_header("Access-Control-Allow-Headers", "*")
-def shape(r): return {k: r[k] for k in ("id", "name", "text", "ts", "prayed", "topic", "answered", "update")}
+def shape(r): return {k: r[k] for k in ("id", "name", "text", "ts", "prayed", "topic", "look", "answered", "update")}
 
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a): pass
@@ -38,7 +39,7 @@ class H(BaseHTTPRequestHandler):
                 name = f2 + " " + l2
             tok = secrets.token_hex(16)
             r = dict(id="r" + uuid.uuid4().hex[:8], name=name, text=t, ts=now(), visibility="team" if body.get("visibility") == "team" else "public", status="live", prayed=0, reports=0,
-                     topic=body.get("topic") if body.get("topic") in TOPICS else "", answered=False, update="", token=h(tok))
+                     topic=body.get("topic") if body.get("topic") in TOPICS else "", look=body.get("look") if body.get("look") in LOOKS else "", answered=False, update="", token=h(tok))
             DB.append(r); return self._json({"ok": True, "token": tok, **shape(r), "visibility": r["visibility"]})
         for r in DB:
             if r["id"] != body.get("id"): continue

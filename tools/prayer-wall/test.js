@@ -220,5 +220,14 @@ check("team-only ignores the Anonymous box and keeps the real name", tOk.name !=
 check("the refused team-only requests were not saved", !data.some(function (r) { return String(r[3]).indexOf("TEAMNAME1") > -1 || String(r[3]).indexOf("TEAMNAME2") > -1 || String(r[3]).indexOf("TEAMNAME3") > -1 || String(r[3]).indexOf("TEAMNAME4") > -1; }));
 check("the team-only request is saved with the full name and never listed", data.some(function (r) { return r[3].indexOf("TEAMNAME5") > -1 && r[2] === "Ivy Stone" && r[4] === "team"; }) && !list().some(function (x) { return x.text.indexOf("TEAMNAME5") > -1; }));
 cacheStore = {}; check("public requests still allow no name and Anonymous", post({ action: "submit", text: "PUBNAME1 please pray for my week ahead.", elapsed: 9000 }).name === "Anonymous");
+// card looks
+cacheStore = {}; var lk = post({ action: "submit", name: "Lia", text: "LOOK1 please pray for my week ahead.", look: "ocean", elapsed: 9000 });
+check("a valid look is saved and returned", lk.ok === true && lk.look === "ocean" && data.some(function (r) { return r[3].indexOf("LOOK1") > -1 && r[13] === "ocean"; }));
+check("the look is on the wall", full().requests.some(function (x) { return x.text.indexOf("LOOK1") > -1 && x.look === "ocean"; }));
+cacheStore = {}; var lk2 = post({ action: "submit", name: "Lia", text: "LOOK2 please pray for my week ahead.", look: "<script>", elapsed: 9000 });
+check("an unknown look is dropped, not rejected", lk2.ok === true && lk2.look === "" && data.some(function (r) { return r[3].indexOf("LOOK2") > -1 && r[13] === ""; }));
+cacheStore = {}; check("no look is fine", post({ action: "submit", name: "Lia", text: "LOOK3 please pray for my week ahead.", elapsed: 9000 }).look === "");
+check("older rows with no look column still list", (function () { data[0].length = 13; return full().requests.every(function (x) { return typeof x.look === "string"; }); })());
+cacheStore = {}; check("every allowed look is accepted", LOOKS.every(function (k, i) { cacheStore = {}; return post({ action: "submit", name: "Lia", text: "LOOKALL" + i + " please pray for my week ahead.", look: k, elapsed: 9000 }).look === k; }));
 check("ids survive Sheets number coercion", /^r/.test(id) && post({ action: "pray", id: id }).ok === true);
 console.log(pass + " passed, " + fail + " failed");
