@@ -137,7 +137,7 @@ input, textarea, select {
   display: none; background: none; border: 1px solid var(--border-ghost); border-radius: 2px;
   padding: 8px 12px; color: var(--cream); cursor: pointer; font-family: var(--font); font-size: 13px;
 }
-@media (max-width: 720px) {
+@media (max-width: 960px) {
   .nav-links { display: none; width: 100%; flex-direction: column; align-items: flex-start; gap: 0; }
   .nav-links.open { display: flex; }
   .nav-links li { width: 100%; }
@@ -625,3 +625,9 @@ p.form-note { font-size: 10.5px; color: var(--dim); line-height: 1.5; margin: 10
 .prayer-names { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 720px) { .prayer-names { grid-template-columns: 1fr; } }
 .prayer-check.is-off { opacity: 0.6; cursor: default; }
+
+/* slim prayer link at the top of the band page */
+.prayer-bar { background: var(--surface); border-bottom: 1px solid var(--hairline-gold); text-align: center; }
+.prayer-bar a { display: block; padding: 14px 20px; font-size: 15px; line-height: 1.5; color: var(--body-text); text-decoration: none; }
+.prayer-bar a strong { color: var(--gold-bright); font-weight: 700; white-space: nowrap; }
+.prayer-bar a:hover strong { color: var(--gold-hover-text); text-decoration: underline; text-underline-offset: 3px; }
