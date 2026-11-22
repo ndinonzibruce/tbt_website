@@ -328,7 +328,7 @@
     preview.appendChild(face(t, currentLook()));
   }
   if (looksBox) {
-    var pick = Math.floor(Math.random() * LOOKS.length); // a random start, so the wall stays varied even if nobody changes it
+    var pick = 0; // cream, the calmest look, is the starting point
     LOOKS.forEach(function (k, i) {
       var lab = el("label", "look-opt");
       var inp = el("input"); inp.type = "radio"; inp.name = "look"; inp.value = k; inp.checked = i === pick;
@@ -362,7 +362,7 @@
     setTimeout(function () {
       syncVisibility();
       var radios = form.querySelectorAll("input[name=look]");
-      if (radios.length) { radios[Math.floor(Math.random() * radios.length)].checked = true; drawPreview(); }
+      if (radios.length) { radios[0].checked = true; drawPreview(); }
     }, 0);
   });
   syncVisibility();
