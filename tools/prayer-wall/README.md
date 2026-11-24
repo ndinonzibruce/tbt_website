@@ -30,6 +30,14 @@ If you ever change `Code.gs`, redeploy with **Deploy → Manage deployments → 
 - **Card looks:** the wall is a feed of colored squares. The poster picks one of 8 looks (a color and a font: cream, night, ocean, gold, wine, sage, peach, ink) on the share form (cream is pre-selected), and it's saved in the **Look** column (column N; `setup` adds the header). Requests with no look (older ones) get a steady one worked out from their ID. To add or rename a look, change `LOOKS` in `Code.gs` and `LOOKS`/`LOOK_NAMES` in `js/prayer.js`, then add a `.look-NAME` rule in `css/styles.css`. The extra fonts (Playfair Display, Caveat, Oswald) load from Google Fonts only on pages that show a card.
 - After editing `Code.gs`: paste it in, run `setup` once (it only rewrites the header row), then **Deploy → Manage deployments → pencil → New version**.
 
+## Prayer update emails (optional, for the poster)
+
+- On the share form a poster can tick **Email me when someone prays for this request** (public requests only). Their email goes in the **Email** column; **Notified** (like `p4n2`: prayers and names already reported) tracks what the last email covered.
+- `sendPrayerNotifications` runs once a day (about 8pm, in the script's time zone) and sends **one** email per subscribed request that was prayed for since the last one, never one per tap. It sends at most `PRAYER_EMAILS_PER_RUN` (60) a day; the rest go out the next day. It comes from the script's account, signed "The Bible Talks Prayer Wall", and replies go to `NOTIFY_EMAIL`.
+- **Set up the daily run once:** in the Apps Script editor pick `installPrayerNotificationTrigger` and Run. It is safe to run again (it never makes a second trigger).
+- The email is cleared from the sheet when the request is answered, removed, hidden, or past its 30 days (the daily run does the sweep), or when the person follows the **Stop these emails** link (`/prayer#stop=ID:TOKEN`, signed with a secret kept in the script's properties). It is never returned by the website's list, and never put in the staff emails or the leaders' summary.
+- Separately, with no email at all, a returning poster sees a banner ("3 people prayed for your request") on the prayer page and homepage, worked out in their own browser from the counts.
+
 ## Who gets emails
 
 - **Pastor Bruce** (main recipient) and the **three TBT staff** (blind copy) get an instant email for every new request (public and team-only), report, and answered prayer.

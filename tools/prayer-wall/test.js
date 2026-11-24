@@ -25,13 +25,16 @@ var LockService = { getScriptLock: function () { return { waitLock: function () 
 var Utilities = {
   getUuid: function () { uuidN++; return ("00000000" + uuidN.toString(16)).slice(-8) + "-aaaa-bbbb-cccc-dddddddddddd"; },
   DigestAlgorithm: { SHA_256: "sha256" },
+  computeHmacSha256Signature: function (val, key) { var h = []; for (var i = 0; i < 32; i++) { var x = 0, m = String(key) + "|" + String(val); for (var k = 0; k < m.length; k++) x = (x * 37 + m.charCodeAt(k) * (i + 3)) % 253; h.push(i % 2 ? x : x - 128); } return h; },
   computeDigest: function (alg, str) { var h = []; for (var i = 0; i < 32; i++) { var x = 0; for (var k = 0; k < str.length; k++) x = (x * 31 + str.charCodeAt(k) * (i + 7)) % 251; h.push(i % 2 ? x : x - 128); } return h; }
 };
 var Logger = { log: function () {} };
+var triggers = [];
+var ScriptApp = { getProjectTriggers: function () { return triggers; }, newTrigger: function (fn) { var t = { fn: fn, getHandlerFunction: function () { return fn; }, timeBased: function () { return t; }, everyDays: function () { return t; }, atHour: function () { return t; }, create: function () { triggers.push(t); return t; } }; return t; } };
 var propStore = {};
 var PropertiesService = { getScriptProperties: function () { return { getProperty: function (k) { return propStore[k] || null; }, setProperty: function (k, v) { propStore[k] = String(v); } }; } };
 var failMail = false;
-var MailApp = { sendEmail: function (a, b, c) { if (failMail) throw new Error("quota"); if (typeof a === "object") mails.push({ to: a.to, bcc: a.bcc, s: a.subject, m: a.body }); else mails.push({ to: a, s: b, m: c }); } };
+var MailApp = { sendEmail: function (a, b, c) { if (failMail) throw new Error("quota"); if (typeof a === "object") mails.push({ to: a.to, bcc: a.bcc, s: a.subject, m: a.body, h: a.htmlBody, rt: a.replyTo, nm: a.name }); else mails.push({ to: a, s: b, m: c }); } };
 var ContentService = { MimeType: { JSON: "json" }, createTextOutput: function (t) { return { text: t, setMimeType: function () { return this; } }; } };
 
 (0, eval)(readFile("tools/prayer-wall/Code.gs"));
@@ -256,5 +259,61 @@ cacheStore = {}; check("no look is fine", post({ action: "submit", name: "Lia", 
 check("older rows with no look column still list", (function () { var keep = data[0].length; data[0].length = 13; var ok = full().requests.every(function (x) { return typeof x.look === "string"; }); return ok; })());
 cacheStore = {}; check("every allowed look is accepted", LOOKS.every(function (k, i) { cacheStore = {}; return post({ action: "submit", name: "Lia", last: "Ray", text: "LOOKALL" + i + " please pray for my week ahead.", look: k, elapsed: 9000 }).look === k; }));
 check("the look does not disturb the names people add when praying", (cacheStore = {}, list().filter(function (x) { return x.id === pn.id; })[0].prayedBy.length > 0));
+
+// ---- email me when someone prays ----
+function subscribe(tag, extra) { cacheStore = {}; var o = { action: "submit", name: "Eve", last: tag, text: "SUB" + tag + " please pray for my week ahead.", notify: true, email: "Eve." + tag + "@Example.com", elapsed: 9000 }; for (var k in (extra || {})) o[k] = extra[k]; return post(o); }
+function rowOf(id) { return data.filter(function (r) { return r[0] === id; })[0]; }
+var sA = subscribe("Aa");
+check("subscribing saves a lowercased email and a starting count", sA.ok && sA.notify === true && rowOf(sA.id)[15] === "eve.aa@example.com" && rowOf(sA.id)[16] === "p0n0");
+cacheStore = {}; var bad = post({ action: "submit", name: "Eve", last: "Bb", text: "SUBBAD please pray for my week ahead.", notify: true, email: "not-an-email", elapsed: 9000 });
+check("a ticked box with a bad email is refused and nothing is saved", bad.ok === false && /valid email/.test(bad.error) && !data.some(function (r) { return String(r[3]).indexOf("SUBBAD") > -1; }));
+cacheStore = {}; var noTick = post({ action: "submit", name: "Eve", last: "Cc", text: "SUBNOTICK please pray for my week ahead.", email: "eve.cc@example.com", elapsed: 9000 });
+check("an email without the ticked box is not stored", noTick.ok && !rowOf(noTick.id)[15] && noTick.notify === false);
+var sTeam = subscribe("Dd", { visibility: "team" });
+check("a team-only request never stores an email", sTeam.ok && !rowOf(sTeam.id)[15]);
+check("the public list never contains an email address", JSON.stringify(full()).indexOf("@example.com") === -1);
+check("the staff email about a new request leaves out the subscriber's address", mails.every(function (m) { return String(m.m).indexOf("@example.com") === -1 && String(m.to).indexOf("example.com") === -1; }));
+
+mails.length = 0;
+check("no prayers yet means no email", sendPrayerNotifications().length === 0 && mails.length === 0);
+post({ action: "pray", id: sA.id, name: "Maria", last: "Santos" }); post({ action: "pray", id: sA.id, name: "Jon", last: "Kim" }); post({ action: "pray", id: sA.id });
+mails.length = 0; var sentIds = sendPrayerNotifications();
+var mA = mails.filter(function (m) { return m.to === "eve.aa@example.com"; });
+check("one email goes to the subscriber after prayers", sentIds.indexOf(sA.id) > -1 && mA.length === 1);
+check("it says how many prayed and who", /3 people prayed for your request, including Maria S\. and Jon K\./.test(mA[0].m));
+check("the sentence ends with one period, not two", mA[0].m.indexOf("..") === -1 && mA[0].h.indexOf("..") === -1);
+check("it quotes the request and links back", mA[0].m.indexOf("SUBAa please pray") > -1 && mA[0].m.indexOf("https://tbtysu.org/prayer") > -1);
+check("it carries a signed stop link and an HTML version", mA[0].m.indexOf("/prayer#stop=" + sA.id + ":") > -1 && mA[0].h && mA[0].h.indexOf("Stop these emails") > -1);
+check("it is sent as the prayer wall, replies go to the pastor", mA[0].nm === "The Bible Talks Prayer Wall" && mA[0].rt === "bchimani@oldnorthchurch.org");
+mails.length = 0; sendPrayerNotifications();
+check("no new prayers means no second email", mails.filter(function (m) { return m.to === "eve.aa@example.com"; }).length === 0);
+post({ action: "pray", id: sA.id });
+mails.length = 0; sendPrayerNotifications();
+check("one more prayer sends a short follow-up", mails.filter(function (m) { return m.to === "eve.aa@example.com" && /1 person prayed for your request\./.test(m.m) && /4 people have prayed/.test(m.m); }).length === 1);
+
+var tok = mA[0].m.match(/#stop=[A-Za-z0-9]+:([0-9a-f]+)/)[1];
+check("a wrong stop token is refused and keeps the email", post({ action: "stop", id: sA.id, token: "0000" }).ok === false && rowOf(sA.id)[15] === "eve.aa@example.com");
+check("a stop token for another request does not work", post({ action: "stop", id: sA.id, token: (function () { var o = subscribe("Zz"); return String(mails.filter(function () { return false; }).length) + stopToken(o.id); })() }).ok === false);
+check("the stop link clears the email", post({ action: "stop", id: sA.id, token: tok }).ok === true && rowOf(sA.id)[15] === "" && rowOf(sA.id)[16] === "");
+post({ action: "pray", id: sA.id }); mails.length = 0; sendPrayerNotifications();
+check("after stopping, prayers send nothing", mails.filter(function (m) { return m.to === "eve.aa@example.com"; }).length === 0);
+
+var sB = subscribe("Ee"); var sC = subscribe("Ff"); var sD = subscribe("Gg"); var sE = subscribe("Hh");
+var tB = post({ action: "answer", id: sB.id, token: sB.token, update: "It worked out." });
+check("marking answered clears the email", tB.ok && rowOf(sB.id)[15] === "");
+check("removing a request clears the email", post({ action: "remove", id: sC.id, token: sC.token }).ok && rowOf(sC.id)[15] === "");
+rowOf(sD.id)[5] = "hidden"; mails.length = 0; sendPrayerNotifications();
+check("a hidden request's email is forgotten by the daily run", rowOf(sD.id)[15] === "");
+check("an expired request's email is forgotten by the daily run", (function () { sendPrayerNotifications(Date.now() + 31 * 86400000); return rowOf(sE.id)[15] === ""; })());
+
+var cap = [subscribe("Jj"), subscribe("Kk"), subscribe("Ll")]; cap.forEach(function (c) { post({ action: "pray", id: c.id }); });
+var oldCap = PRAYER_EMAILS_PER_RUN; PRAYER_EMAILS_PER_RUN = 2; mails.length = 0;
+var first = sendPrayerNotifications().filter(function (id) { return cap.some(function (c) { return c.id === id; }); }).length;
+check("a run stops at the daily cap", first === 2);
+var second = sendPrayerNotifications().filter(function (id) { return cap.some(function (c) { return c.id === id; }); }).length;
+PRAYER_EMAILS_PER_RUN = oldCap;
+check("the one left over goes out on the next run", second === 1);
+check("the trigger installer creates one daily trigger and is safe to repeat", (installPrayerNotificationTrigger(), installPrayerNotificationTrigger(), triggers.filter(function (t) { return t.fn === "sendPrayerNotifications"; }).length === 1));
+check("leader summary never contains a subscriber's email", (function () { mails.length = 0; sendLeaderSummaryNow(); return mails.every(function (m) { return String(m.m).indexOf("@example.com") === -1 && String(m.bcc || "").indexOf("example.com") === -1; }); })());
 check("ids survive Sheets number coercion", /^r/.test(id) && post({ action: "pray", id: id }).ok === true);
 console.log(pass + " passed, " + fail + " failed");

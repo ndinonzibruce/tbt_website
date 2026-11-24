@@ -4,6 +4,9 @@
 //
 // To hide a request: change its Status cell to "hidden". To bring it back: "live".
 // Requests marked "team" in Visibility are never shown on the website. Everyone gives a first and last name, public or team-only.
+// A poster can tick "Email me when someone prays": their email is stored in the Email column (public requests only),
+// used for one short email a day (sendPrayerNotifications), and cleared when the request is answered, removed,
+// hidden or expires, or when they follow the stop link. It is never sent to the website.
 // A poster gets a private link (a secret token, stored here only as a hash) that lets
 // them mark their own request answered or remove it. You can do the same in the sheet:
 // set Answered to "yes" and fill in Update, or set Status to "hidden".
@@ -27,8 +30,10 @@ var HIDE_AFTER_REPORTS = 3;  // a request reported this many times is hidden aut
 var MAX_PER_HOUR = 40;       // brake against floods of submissions
 var MIN_FILL_MS = 3000;      // a human takes longer than this to fill in the form
 
-var COLS = ["ID", "Time", "Name", "Request", "Visibility", "Status", "Prayed", "Reports", "Topic", "Answered", "Update", "AnsweredAt", "TokenHash", "PrayedBy", "Look"];
-var C = { ID: 0, TIME: 1, NAME: 2, TEXT: 3, VIS: 4, STATUS: 5, PRAYED: 6, REPORTS: 7, TOPIC: 8, ANSWERED: 9, UPDATE: 10, ANSWERED_AT: 11, TOKEN: 12, PRAYED_BY: 13, LOOK: 14 };
+var COLS = ["ID", "Time", "Name", "Request", "Visibility", "Status", "Prayed", "Reports", "Topic", "Answered", "Update", "AnsweredAt", "TokenHash", "PrayedBy", "Look", "Email", "Notified"];
+var C = { ID: 0, TIME: 1, NAME: 2, TEXT: 3, VIS: 4, STATUS: 5, PRAYED: 6, REPORTS: 7, TOPIC: 8, ANSWERED: 9, UPDATE: 10, ANSWERED_AT: 11, TOKEN: 12, PRAYED_BY: 13, LOOK: 14, EMAIL: 15, NOTIFIED: 16 };
+var SITE_URL = "https://tbtysu.org";
+var PRAYER_EMAILS_PER_RUN = 60; // daily "someone prayed" emails per run; Google allows about 100 recipients a day, and staff and leader mail share that
 var MAX_PRAYER_NAMES = 40; // names people chose to show when they prayed, kept per request (the card shows the latest few)
 
 // ---------- run once from the editor (safe to run again after an update) ----------
@@ -71,6 +76,7 @@ function doPost(e) {
     else if (body.action === "report") result = bump(body.id, C.REPORTS + 1, true);
     else if (body.action === "answer") result = answer(body, Date.now());
     else if (body.action === "remove") result = removeOwn(body);
+    else if (body.action === "stop") result = stopEmails(body);
     else result = { ok: false, error: "unknown action" };
     if (result.ok) CacheService.getScriptCache().remove("wall2");
     return out(result);
@@ -99,6 +105,12 @@ function cleanTopic(raw) {
   return TOPICS.indexOf(raw) !== -1 ? raw : "";
 }
 
+// An email address for prayer updates, or "" when it isn't a plausible address.
+function cleanEmail(raw) {
+  var e = String(raw || "").trim().toLowerCase();
+  return e.length <= 100 && /^[^\s@,;<>()]+@[^\s@,;<>()]+\.[^\s@,;<>()]{2,}$/.test(e) ? e : "";
+}
+
 // A card look the poster picked. Anything else is left blank, and the page picks one from the post's ID.
 function cleanLook(raw) {
   return LOOKS.indexOf(raw) !== -1 ? raw : "";
@@ -123,8 +135,14 @@ function validate(body, recentTexts) {
   // Everyone signs with a first and last name. Anonymous posting is not an option.
   var name = cleanName(body.name, body.last);
   if (!name || name.split(" ").length < 2) return { ok: false, error: "Please enter your first and last name." };
+  var email = "";
+  if (visibility === "public" && body.notify) {
+    email = cleanEmail(body.email);
+    if (!email) return { ok: false, error: "Please enter a valid email address, or untick the email box." };
+  }
   return {
     ok: true,
+    email: email,
     text: text,
     name: name,
     visibility: visibility,
@@ -138,9 +156,23 @@ function newToken() {
   return (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, "").slice(0, 32);
 }
 
-function hashToken(token) {
-  var bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(token));
+function toHex(bytes) {
   return bytes.map(function (b) { return ("0" + ((b < 0 ? b + 256 : b)).toString(16)).slice(-2); }).join("");
+}
+
+function hashToken(token) {
+  return toHex(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(token)));
+}
+
+// The "stop these emails" link carries a signed token for the request, made with a secret only this script knows.
+function stopKey() {
+  var props = PropertiesService.getScriptProperties(), k = props.getProperty("stopKey");
+  if (!k) { k = newToken() + newToken(); props.setProperty("stopKey", k); }
+  return k;
+}
+
+function stopToken(id) {
+  return toHex(Utilities.computeHmacSha256Signature(String(id), stopKey())).slice(0, 24);
 }
 
 // ---------- sheet access ----------
@@ -184,11 +216,11 @@ function submit(body, now) {
   var id = "r" + Utilities.getUuid().replace(/-/g, "").slice(0, 8);
   var token = newToken();
   var time = new Date(now).toISOString();
-  sheet().appendRow([id, time, v.name, v.text, v.visibility, "live", 0, 0, v.topic, "", "", "", hashToken(token), "", v.look]);
+  sheet().appendRow([id, time, v.name, v.text, v.visibility, "live", 0, 0, v.topic, "", "", "", hashToken(token), "", v.look, v.email, v.email ? "p0n0" : ""]);
   cache.put(bucket, String(count + 1), 3600);
   notify((v.visibility === "team" ? "[TEAM ONLY] " : "") + "New prayer request from " + v.name,
     v.text + "\n\nVisibility: " + v.visibility + (v.topic ? "\nTopic: " + v.topic : "") + "\nTo hide it, set Status to \"hidden\" in the sheet.");
-  return { ok: true, id: id, token: token, name: v.name, text: v.text, ts: time, prayed: 0, visibility: v.visibility, topic: v.topic, look: v.look, answered: false, update: "" };
+  return { ok: true, id: id, token: token, name: v.name, text: v.text, ts: time, prayed: 0, visibility: v.visibility, topic: v.topic, look: v.look, notify: !!v.email, answered: false, update: "" };
 }
 
 // column is 1-based. For reports, the request is hidden once enough people flag it.
@@ -259,6 +291,7 @@ function answer(body, now) {
   if (update && hasContactInfo(update)) return { ok: false, error: "Please take out links, email addresses and phone numbers." };
   var at = new Date(now).toISOString();
   sh.getRange(r, C.ANSWERED + 1, 1, 3).setValues([["yes", update, at]]);
+  clearEmail(hit.index);
   notify("Prayer answered", String(hit.row[C.TEXT]) + "\n\nUpdate: " + (update || "(none)"));
   return { ok: true, answered: true, update: update, answeredAt: at };
 }
@@ -268,7 +301,82 @@ function removeOwn(body) {
   var hit = ownedRow(body.id, body.token);
   if (!hit) return { ok: false, error: "That link doesn't match this request." };
   sheet().getRange(hit.index + 2, C.STATUS + 1).setValue("removed");
+  clearEmail(hit.index);
   return { ok: true };
+}
+
+// ---------- prayer update emails ----------
+function clearEmail(index) {
+  sheet().getRange(index + 2, C.EMAIL + 1, 1, 2).setValues([["", ""]]);
+}
+
+// The link in every email: forget this request's email address.
+function stopEmails(body) {
+  var hit = findRow(body.id);
+  if (!hit || !body.token || String(body.token) !== stopToken(hit.row[C.ID])) return { ok: false, error: "That stop link doesn't match." };
+  clearEmail(hit.index);
+  return { ok: true };
+}
+
+function parseNotified(v) {
+  var m = /^p(\d+)n(\d+)$/.exec(String(v || ""));
+  return m ? { p: Number(m[1]), n: Number(m[2]) } : { p: 0, n: 0 };
+}
+
+function escapeHtml(t) {
+  return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function prayerEmail(row, fresh, newNames) {
+  var total = Number(row[C.PRAYED]) || 0, text = String(row[C.TEXT]);
+  var stop = SITE_URL + "/prayer#stop=" + row[C.ID] + ":" + stopToken(row[C.ID]);
+  var who = fresh === 1 ? "1 person prayed" : fresh + " people prayed";
+  var incl = newNames.length ? ", including " + (newNames.length > 1 ? newNames.slice(0, -1).join(", ") + " and " + newNames[newNames.length - 1] : newNames[0]) : "";
+  var first = String(row[C.NAME]).split(" ")[0];
+  var end = /\.$/.test(incl) ? "" : "."; // a last initial already ends in a period
+  var line1 = who + " for your request" + incl + end;
+  var line2 = "So far, " + (total === 1 ? "1 person has" : total + " people have") + " prayed for it. If God has answered, you can tell everyone from your private link.";
+  var foot = "You're getting this because you asked for prayer updates on this request. We use your email for this and nothing else, and we delete it when your request comes off the wall or is marked answered.";
+  return {
+    subject: "Someone prayed for your request \ud83d\ude4f",
+    body: "Hi " + first + ",\n\n" + line1 + "\n\n\"" + text + "\"\n\n" + line2 + "\n\nSee your request: " + SITE_URL + "/prayer\n\n" + foot + "\nStop these emails: " + stop,
+    htmlBody: '<div style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;color:#222;max-width:560px">' +
+      "<p>Hi " + escapeHtml(first) + ",</p><p><b>" + escapeHtml(who) + " for your request</b>" + escapeHtml(incl) + end + "</p>" +
+      '<p style="border-left:4px solid #B08D4F;background:#f7f2e6;padding:12px 16px;font-style:italic">\u201c' + escapeHtml(text) + "\u201d</p>" +
+      "<p>" + escapeHtml(line2) + '</p><p><a href="' + SITE_URL + '/prayer" style="background:#0B0B0C;color:#E7CF98;padding:11px 20px;text-decoration:none;border-radius:4px;font-weight:700;display:inline-block">See your request</a></p>' +
+      '<p style="font-size:12.5px;color:#777;border-top:1px solid #e5e2db;padding-top:12px;margin-top:24px">' + escapeHtml(foot) +
+      '<br><a href="' + stop + '" style="color:#555">Stop these emails</a></p></div>'
+  };
+}
+
+// Run once a day by a time trigger. Emails each subscribed poster whose request was prayed for since their last email,
+// and forgets the address of any request that is no longer on the wall (answered, removed, hidden, or past its 30 days).
+function sendPrayerNotifications(now) {
+  now = typeof now === "number" ? now : Date.now();
+  var all = rows(), sent = 0, mailed = [];
+  for (var i = 0; i < all.length; i++) {
+    var r = all[i], email = String(r[C.EMAIL] || "");
+    if (!email) continue;
+    if (!onWall(r, now) || r[C.ANSWERED] === "yes") { clearEmail(i); continue; }
+    var st = parseNotified(r[C.NOTIFIED]), prayed = Number(r[C.PRAYED]) || 0, names = prayedByList(r);
+    var fresh = prayed - st.p;
+    if (fresh <= 0) continue;
+    if (sent >= PRAYER_EMAILS_PER_RUN) break; // the rest go out tomorrow, nothing is lost
+    var mail = prayerEmail(r, fresh, names.slice(st.n).slice(-3));
+    try {
+      MailApp.sendEmail({ to: email, subject: mail.subject, body: mail.body, htmlBody: mail.htmlBody, name: "The Bible Talks Prayer Wall", replyTo: NOTIFY_EMAIL || undefined });
+      sheet().getRange(i + 2, C.NOTIFIED + 1).setValue("p" + prayed + "n" + names.length);
+      sent++; mailed.push(String(r[C.ID]));
+    } catch (e) { Logger.log("prayer email failed: " + e); }
+  }
+  return mailed;
+}
+
+// Run once from the editor: sets up the daily 8pm run (in the script's time zone). Safe to run again.
+function installPrayerNotificationTrigger() {
+  var has = ScriptApp.getProjectTriggers().some(function (t) { return t.getHandlerFunction() === "sendPrayerNotifications"; });
+  if (!has) ScriptApp.newTrigger("sendPrayerNotifications").timeBased().everyDays(1).atHour(20).create();
+  Logger.log(has ? "The daily prayer-update trigger already exists." : "Created the daily prayer-update trigger (about 8pm).");
 }
 
 // ---------- what the wall shows ----------

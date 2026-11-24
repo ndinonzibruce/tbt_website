@@ -24,7 +24,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,500;6..12,600;6..12,700&display=swap" rel="stylesheet" />
 <link rel="icon" type="image/png" href="images/favicon.png?v=6" />
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png?v=6" />
-<link rel="stylesheet" href="css/styles.css?v=32" />
+<link rel="stylesheet" href="css/styles.css?v=33" />
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -106,6 +106,14 @@
         <label class="prayer-radio"><input type="radio" name="visibility" value="team" /> Only the TBT team. It won't be shown on the site.</label>
         <p class="prayer-hint" style="margin-top:4px;">We don't post anonymous requests. If you don't want your request on the wall for everyone to see, choose "Only the TBT team." You still need to include your first and last name so we know who to pray for and reach.</p>
       </fieldset>
+      <fieldset id="pf-notify">
+        <legend>Get a notification (optional)</legend>
+        <label class="prayer-check"><input type="checkbox" name="notify" /> <span>Email me when someone prays for this request</span></label>
+        <div id="pf-email-wrap" hidden>
+          <input id="pf-email" name="email" type="email" maxlength="100" autocomplete="email" placeholder="you@example.com" aria-label="Your email address" />
+        </div>
+        <p class="prayer-hint" style="margin-top:8px;"><strong>One short email a day, only on days someone prayed.</strong> We use your email for this and nothing else. The TBT team can see it in our sheet. It's deleted automatically when your request comes off the wall, is marked answered, or you remove it, and every email has a link to stop them.</p>
+      </fieldset>
       <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off" /></label></div>
       <button type="submit" class="btn btn-gold btn-lg">Share request</button>
       <p id="prayer-msg" class="prayer-msg" role="status" aria-live="polite"></p>
@@ -152,7 +160,7 @@
 <script src="js/main.js?v=2"></script>
 <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
 <script src="js/prayer-config.js"></script>
-<script src="js/prayer.js?v=3"></script>
+<script src="js/prayer.js?v=4"></script>
 <script data-goatcounter="https://thebibletalksysu.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
 </body>

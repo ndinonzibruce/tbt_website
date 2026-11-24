@@ -37,9 +37,13 @@ class H(BaseHTTPRequestHandler):
             tok = secrets.token_hex(16)
             r = dict(id="r" + uuid.uuid4().hex[:8], name=name, text=t, ts=now(), visibility="team" if body.get("visibility") == "team" else "public", status="live", prayed=0, reports=0,
                      topic=body.get("topic") if body.get("topic") in TOPICS else "", look=body.get("look") if body.get("look") in LOOKS else "", answered=False, update="", token=h(tok))
-            DB.append(r); return self._json({"ok": True, "token": tok, **shape(r), "visibility": r["visibility"]})
+            r["email"] = str(body.get("email", "")).strip().lower() if body.get("notify") and r["visibility"] == "public" else ""
+            DB.append(r); return self._json({"ok": True, "token": tok, **shape(r), "visibility": r["visibility"], "notify": bool(r["email"])})
         for r in DB:
             if r["id"] != body.get("id"): continue
+            if a == "stop":
+                if body.get("token") != "abc123": return self._json({"ok": False, "error": "That stop link doesn't match."})
+                r["email"] = ""; return self._json({"ok": True})
             if a in ("answer", "remove"):
                 if h(str(body.get("token", ""))) != r["token"]: return self._json({"ok": False, "error": "That link doesn't match this request."})
                 if a == "remove": r["status"] = "removed"; return self._json({"ok": True})

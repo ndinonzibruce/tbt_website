@@ -18,7 +18,7 @@
   var LIMIT = wall ? parseInt(wall.getAttribute("data-limit") || "80", 10) : 0;
   var FULL = !!(wall && wall.getAttribute("data-full")); // the full wall page, not a short list
   var loadedAt = Date.now();
-  var state = { requests: [], answered: [], prayers: 0, focus: false };
+  var state = { requests: [], answered: [], prayers: 0, focus: false, news: [], noticeGone: false };
 
   var store = {
     list: function (k) { try { return JSON.parse(localStorage.getItem(k) || "[]"); } catch (e) { return []; } },
@@ -60,6 +60,77 @@
     var sec = document.getElementById("prayer-section");
     if (sec) sec.hidden = true;
     return;
+  }
+
+  // ---------- "someone prayed for your request" (on the page, no email needed) ----------
+  function seenMap() { try { return JSON.parse(localStorage.getItem("tbtSeen") || "{}"); } catch (e) { return {}; } }
+  function setSeen(id, prayed, names) { try { var m = seenMap(); m[id] = { p: prayed, n: names }; localStorage.setItem("tbtSeen", JSON.stringify(m)); } catch (e) {} }
+  function findAny(id) { var i = findIn(state.requests, id); if (i !== -1) return state.requests[i]; i = findIn(state.answered, id); return i !== -1 ? state.answered[i] : null; }
+  // For each request this device posted: how many prayers (and names) are new since it was last seen.
+  function computeNews() {
+    var mine = store.mine(), seen = seenMap(), items = [];
+    Object.keys(mine).forEach(function (id) {
+      var r = findAny(id); if (!r) return;
+      var names = r.prayedBy || [], s0 = seen[id];
+      if (!s0) { setSeen(id, r.prayed || 0, names.length); return; } // posted before this feature: start counting from now
+      var d = (r.prayed || 0) - s0.p;
+      if (d > 0) items.push({ r: r, d: d, names: names.slice(s0.n) });
+    });
+    return items;
+  }
+  function markSeen(items) { items.forEach(function (x) { setSeen(x.r.id, x.r.prayed || 0, (x.r.prayedBy || []).length); }); }
+  function nameList(shown, others) {
+    var list = shown.length > 1 ? shown.slice(0, -1).join(", ") + (others ? ", " : " and ") + shown[shown.length - 1] : shown[0];
+    return list + (others ? " and " + others + (others === 1 ? " other" : " others") : "");
+  }
+  var noticeEl = null;
+  function noticeHost() {
+    if (noticeEl) return noticeEl;
+    var anchor = form || wall; if (!anchor) return null;
+    noticeEl = el("div", "prayer-notices"); anchor.parentNode.insertBefore(noticeEl, anchor);
+    return noticeEl;
+  }
+  function showNote(text, isErr) {
+    var host = noticeHost(); if (!host) return;
+    var p = el("p", "prayer-note" + (isErr ? " is-err" : ""), text); p.setAttribute("role", "status");
+    host.appendChild(p);
+  }
+  function renderNotice() {
+    var host = noticeHost(); if (!host) return;
+    var old = host.querySelector(".prayer-notice"); if (old) old.remove();
+    var items = state.news; if (!items.length || state.noticeGone) return;
+    var total = 0, names = [];
+    items.forEach(function (x) { total += x.d; x.names.forEach(function (n) { if (names.indexOf(n) === -1) names.push(n); }); });
+    var box = el("div", "prayer-notice"); box.setAttribute("role", "status");
+    box.appendChild(el("div", "prayer-notice-em", "\ud83d\ude4f"));
+    var txt = el("div", "prayer-notice-text");
+    txt.appendChild(el("b", null, (total === 1 ? "1 person prayed" : total + " people prayed") + " for your " + (items.length === 1 ? "request" : "requests")));
+    var shown = names.slice(-3);
+    txt.appendChild(el("span", null, "Since you were last here" + (shown.length ? ": " + nameList(shown, Math.max(0, total - shown.length)) : ".")));
+    box.appendChild(txt);
+    var see;
+    if (FULL) {
+      see = el("button", "prayer-notice-go", "See it"); see.type = "button";
+      see.addEventListener("click", function () {
+        markSeen(items); state.noticeGone = true; renderNotice();
+        var c = wall.querySelector('[data-id="' + items[0].r.id + '"]'); if (c && c.scrollIntoView) c.scrollIntoView({ block: "center", behavior: "smooth" });
+      });
+    } else { see = el("a", "prayer-notice-go", "See it"); see.href = "/prayer"; }
+    box.appendChild(see);
+    var x = el("button", "prayer-notice-x", "\u00d7"); x.type = "button"; x.setAttribute("aria-label", "Dismiss");
+    x.addEventListener("click", function () { markSeen(items); state.news = []; state.noticeGone = true; renderNotice(); render(); });
+    box.appendChild(x);
+    host.insertBefore(box, host.firstChild);
+  }
+
+  // The "stop these emails" link in a prayer-update email looks like /prayer#stop=ID:TOKEN.
+  var hs = /^#stop=([A-Za-z0-9]+):([0-9a-f]+)$/.exec(location.hash);
+  if (hs) {
+    try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+    fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "stop", id: hs[1], token: hs[2] }) })
+      .then(function (r) { return r.json(); })
+      .then(function (res) { showNote(res && res.ok ? "Done. You won't get any more emails about this request, and your email address has been deleted." : "That stop link didn't work. Text us at (234) 297-7413 and we'll take care of it.", !(res && res.ok)); })
+      .catch(function () { showNote("That didn't go through. Please try the link again.", true); });
   }
 
   function api(body) {
@@ -122,6 +193,8 @@
 
     var pic = face(r.text, lookOf(r));
     if (r.answered) pic.appendChild(el("span", "prayer-badge", "Answered"));
+    var fresh = state.news.filter(function (x) { return x.r.id === r.id; })[0];
+    if (fresh) pic.appendChild(el("span", "prayer-new", "+" + fresh.d + " NEW"));
     art.appendChild(pic);
     if (r.answered && r.update) {
       var up = el("p", "prayer-update");
@@ -358,7 +431,8 @@
       .then(function (res) {
         if (!(res && res.ok)) throw new Error("bad");
         state.requests = res.requests || []; state.answered = res.answered || []; state.prayers = res.prayers || 0;
-        render();
+        state.news = computeNews(); state.noticeGone = false;
+        render(); renderNotice();
       })
       .catch(function () {
         wall.textContent = "";
@@ -404,6 +478,24 @@
 
   // First and last name are always required.
   var firstIn = form.querySelector("#pf-name"), lastIn = form.querySelector("#pf-last");
+
+  // The optional "email me when someone prays" box (public requests only).
+  var notifySet = document.getElementById("pf-notify"), notifyBox = form.querySelector("input[name=notify]");
+  var emailWrap = document.getElementById("pf-email-wrap"), emailIn = form.querySelector("#pf-email");
+  function isTeam() { return form.querySelector("input[name=visibility]:checked").value === "team"; }
+  function syncNotify() {
+    if (!notifySet) return;
+    notifySet.hidden = isTeam();
+    emailWrap.hidden = !(notifyBox.checked && !isTeam());
+    emailIn.required = notifyBox.checked && !isTeam();
+  }
+  if (notifySet) {
+    [].forEach.call(form.querySelectorAll("input[name=visibility]"), function (r) { r.addEventListener("change", syncNotify); });
+    notifyBox.addEventListener("change", function () { syncNotify(); if (notifyBox.checked) emailIn.focus(); });
+    form.addEventListener("reset", function () { setTimeout(syncNotify, 0); });
+    syncNotify();
+  }
+  function maskEmail(e) { var i = e.indexOf("@"); return i < 1 ? e : e.charAt(0) + "\u2022\u2022\u2022\u2022\u2022\u2022" + e.slice(i); }
   form.addEventListener("reset", function () {
     setTimeout(function () {
       var radios = form.querySelectorAll("input[name=look]");
@@ -411,21 +503,39 @@
     }, 0);
   });
 
-  function showManage(res) {
+  function showManage(res, email) {
     if (!manage || !res.token) return;
     var link = location.origin + "/prayer#mine=" + res.id + ":" + res.token;
     manage.textContent = "";
-    manage.appendChild(el("p", "prayer-manage-title", "Your private link"));
-    manage.appendChild(el("p", "prayer-hint", "This phone will remember your request, so you can mark it answered or remove it right here. To do that from another device, save this link. Don't share it. Anyone who has it can change your request."));
+    if (email) manage.appendChild(el("p", "prayer-manage-ok", "\u2713 We'll email " + maskEmail(email) + " when someone prays for it."));
+    manage.appendChild(el("p", "prayer-manage-title", "Save your private link"));
+    manage.appendChild(el("p", "prayer-hint", "This link lets you mark your request answered or remove it, even from another phone. Without it, you may lose that if your phone clears its saved data. Don't share it. Anyone who has it can change your request."));
     var input = el("input"); input.type = "text"; input.readOnly = true; input.value = link; input.setAttribute("aria-label", "Your private link");
     input.addEventListener("focus", function () { input.select(); });
+    manage.appendChild(input);
+    var row = el("div", "prayer-manage-row");
     var copy = el("button", "btn btn-ghost btn-md", "Copy link"); copy.type = "button";
     copy.addEventListener("click", function () {
       var done = function () { copy.textContent = "Copied"; setTimeout(function () { copy.textContent = "Copy link"; }, 2200); };
       if (navigator.clipboard) navigator.clipboard.writeText(link).then(done, function () { input.select(); });
       else input.select();
     });
-    var row = el("div", "prayer-manage-row"); row.appendChild(input); row.appendChild(copy); manage.appendChild(row);
+    var mailme = el("button", "btn btn-ghost btn-md", "Send it to myself"); mailme.type = "button";
+    mailme.addEventListener("click", function () {
+      var note = "My private link for my TBT prayer request (don't share it): " + link;
+      if (navigator.share) navigator.share({ title: "My prayer request link", text: note }).catch(function () {});
+      else location.href = "mailto:?subject=" + encodeURIComponent("My private prayer request link") + "&body=" + encodeURIComponent(note);
+    });
+    var home = el("button", "btn btn-ghost btn-md", "Add to home screen"); home.type = "button";
+    var homeHelp = el("p", "prayer-hint"); homeHelp.hidden = true;
+    home.addEventListener("click", function () {
+      // The shortcut saves this page's address, so put the private link in it first. The page tidies the address again next time it opens.
+      try { history.replaceState(null, "", location.pathname + location.search + "#mine=" + res.id + ":" + res.token); } catch (e) {}
+      homeHelp.textContent = "Now add this page to your home screen. iPhone: tap the Share button, then Add to Home Screen. Android: open the browser menu, then Add to Home screen. The shortcut remembers your request. Don't share this page's address until you've done it.";
+      homeHelp.hidden = false;
+    });
+    row.appendChild(copy); row.appendChild(mailme); row.appendChild(home);
+    manage.appendChild(row); manage.appendChild(homeHelp);
     manage.hidden = false;
   }
 
@@ -440,6 +550,14 @@
       (String(fd.get("name") || "").trim() ? lastIn : firstIn).focus();
       return;
     }
+    var wantsEmail = !!notifySet && !isTeam() && fd.get("notify") === "on";
+    var email = String(fd.get("email") || "").trim();
+    if (wantsEmail && !/^[^\s@,;<>()]+@[^\s@,;<>()]+\.[^\s@,;<>()]{2,}$/.test(email)) {
+      msg.className = "prayer-msg err";
+      msg.textContent = "Please enter a valid email address, or untick the email box.";
+      emailIn.focus();
+      return;
+    }
     send.disabled = true; send.textContent = "Sending…";
     api({
       action: "submit",
@@ -448,6 +566,8 @@
       text: fd.get("text"),
       topic: fd.get("topic"),
       look: fd.get("look"),
+      notify: wantsEmail,
+      email: wantsEmail ? email : "",
       visibility: fd.get("visibility"),
       website: fd.get("website"),
       elapsed: Date.now() - loadedAt
@@ -458,7 +578,8 @@
         msg.className = "prayer-msg ok";
         msg.textContent = team ? "Thank you. Your request was sent to the TBT team. It won't appear on the site." : "Thank you. Your request is on the wall.";
         form.reset(); counter.textContent = "0 / 500";
-        showManage(res);
+        if (!team) setSeen(res.id, 0, 0);
+        showManage(res, res.notify ? email : "");
         if (!team && wall) {
           state.requests.unshift({ id: res.id, name: res.name, text: res.text, ts: res.ts, prayed: 0, topic: res.topic || "", look: res.look || "", answered: false, update: "" });
           render();
